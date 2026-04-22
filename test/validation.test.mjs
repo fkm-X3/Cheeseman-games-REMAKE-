@@ -1,22 +1,28 @@
-const test = require("node:test");
-const assert = require("node:assert/strict");
+import test from "node:test";
+import assert from "node:assert/strict";
 
-const {
+import {
   InputError,
   parseJsonBody,
   validateGameKey,
   validateScore,
   parseLimit,
-} = require("../netlify/functions/_lib/validation");
+} from "../lib/server/validation.mjs";
 
-test("parseJsonBody parses valid json", () => {
-  const body = parseJsonBody({ body: "{\"score\": 10}" });
+function buildRequest(bodyText) {
+  return {
+    text: async () => bodyText,
+  };
+}
+
+test("parseJsonBody parses valid json", async () => {
+  const body = await parseJsonBody(buildRequest("{\"score\": 10}"));
   assert.equal(body.score, 10);
 });
 
-test("parseJsonBody throws InputError for invalid json", () => {
-  assert.throws(
-    () => parseJsonBody({ body: "{invalid}" }),
+test("parseJsonBody throws InputError for invalid json", async () => {
+  await assert.rejects(
+    () => parseJsonBody(buildRequest("{invalid}")),
     (error) => error instanceof InputError
   );
 });

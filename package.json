@@ -1,11 +1,11 @@
 {
   "name": "cheeseman-remake",
   "version": "1.0.0",
-  "description": "Netlify-hosted gaming site with Node.js serverless backend",
+  "description": "Next.js game site with Vercel-ready API routes",
   "keywords": [
     "games",
-    "netlify",
-    "nodejs",
+    "nextjs",
+    "vercel",
     "leaderboard"
   ],
   "homepage": "https://github.com/fkm-X3/Cheeseman-games-REMAKE-#readme",
@@ -18,20 +18,18 @@
   },
   "license": "GPL-3.0-only",
   "author": "Fkm_X3",
-  "type": "commonjs",
-  "main": "index.js",
   "scripts": {
-    "dev": "netlify dev",
-    "build": "node -e \"console.log('No build step required for static frontend + Netlify Functions.')\"",
-    "start": "netlify dev",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "test": "node --test"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "firebase-admin": "^13.8.0",
-    "jsonwebtoken": "^9.0.2"
-  },
-  "devDependencies": {
-    "netlify-cli": "^17.38.0"
+    "jsonwebtoken": "^9.0.2",
+    "next": "^15.3.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   }
 }

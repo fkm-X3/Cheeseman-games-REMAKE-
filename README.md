@@ -1,59 +1,53 @@
 # Cheeseman Games Remake
 
-A simple game site designed for Netlify hosting with a Node.js backend running as Netlify Functions.
+A Next.js (App Router) game site ready for Vercel deployment, with Firebase-backed auth and leaderboard APIs.
 
-## Features (v1)
+## Features
 
-- Static frontend with one playable game: **Catch the Cheese**
-- User auth with username/email + password
-- JWT session token flow
-- Score submission API
-- Leaderboard API (top scores per user)
+- Catch the Cheese browser game
+- Username/email registration and login
+- JWT session flow
+- Score submission and leaderboard APIs
 - Firebase Firestore persistence
 
 ## Tech stack
 
-- Frontend: HTML, CSS, vanilla JS (`public/`)
-- Backend: Node.js Netlify Functions (`netlify/functions/`)
+- Frontend + backend runtime: Next.js App Router (`app/` and `app/api/`)
+- Server modules: `lib/server/`
 - Database: Firebase Firestore
+- Deployment target: Vercel
 
 ## Project structure
 
 ```txt
-public/
-  index.html
-  style.css
-  app.js
-netlify/
-  functions/
-    _lib/
-      auth.js
-      db.js
-      env.js
-      response.js
-      validation.js
-    auth-register.js
-    auth-login.js
-    auth-me.js
-    leaderboard-submit.js
-    leaderboard-top.js
+app/
+  api/
+    auth/
+      login/route.js
+      me/route.js
+      register/route.js
+    leaderboard/
+      submit/route.js
+      top/route.js
+  globals.css
+  layout.js
+  page.js
+lib/
+  server/
+    auth.mjs
+    db.mjs
+    env.mjs
+    validation.mjs
 ```
 
 ## Environment variables
 
-Copy `.env.example` to `.env` and set:
+Copy `.env.example` to `.env.local` and set:
 
 - `FIREBASE_PROJECT_ID` - Firebase project ID
 - `FIREBASE_CLIENT_EMAIL` - service account client email
 - `FIREBASE_PRIVATE_KEY` - service account private key (keep `\n` escapes in env value)
 - `JWT_SECRET` - long random secret for signing JWTs
-
-## Database setup
-
-1. Create a Firebase project and enable Firestore (Native mode).
-2. Create a service account key in Firebase Console.
-3. Set `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, and `FIREBASE_PRIVATE_KEY` from that key.
-4. Collections are created automatically when the API writes data.
 
 ## Local development
 
@@ -63,19 +57,17 @@ Copy `.env.example` to `.env` and set:
    npm install
    ```
 
-2. Create `.env` from `.env.example` and fill in values.
+2. Create `.env.local` from `.env.example` and fill in values.
 
-3. Start local Netlify dev server:
+3. Start the Next.js dev server:
 
    ```bash
    npm run dev
    ```
 
-4. Open the local URL printed by Netlify CLI.
+4. Open `http://localhost:3000`.
 
 ## API routes
-
-Through Netlify redirects:
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
@@ -83,9 +75,9 @@ Through Netlify redirects:
 - `POST /api/leaderboard/submit`
 - `GET /api/leaderboard/top?gameKey=cheese-clicker&limit=10`
 
-## Deployment to Netlify
+## Deployment to Vercel
 
 1. Push repository to GitHub.
-2. Connect the repo in Netlify.
-3. Set environment variables (`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `JWT_SECRET`) in Netlify site settings.
+2. Import the repository in Vercel.
+3. Set environment variables (`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `JWT_SECRET`) in Vercel project settings.
 4. Deploy.
