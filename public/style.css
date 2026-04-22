@@ -1,0 +1,122 @@
+:root {
+  color-scheme: dark;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #0e1020;
+  color: #f3f5ff;
+}
+
+.site-header {
+  padding: 2rem 1.25rem 1rem;
+  text-align: center;
+}
+
+.site-header h1 {
+  margin: 0 0 0.25rem;
+}
+
+.layout {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.card {
+  background: #1a1f3a;
+  border: 1px solid #2b3360;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.form-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+input,
+button {
+  font: inherit;
+  border-radius: 8px;
+  border: 1px solid #3e4b86;
+  padding: 0.55rem 0.7rem;
+}
+
+input {
+  background: #0f1430;
+  color: #f3f5ff;
+}
+
+button {
+  background: #5372ff;
+  color: white;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: #2d3568;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.game-stats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+#game-area {
+  position: relative;
+  height: 260px;
+  margin-top: 1rem;
+  border-radius: 10px;
+  border: 1px dashed #5160a6;
+  background: #101736;
+}
+
+#cheese-button {
+  position: absolute;
+  width: 54px;
+  height: 54px;
+  font-size: 1.4rem;
+  border-radius: 999px;
+}
+
+.leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+#leaderboard-list {
+  margin: 0.75rem 0 0;
+  padding-left: 1.3rem;
+}
+
+#leaderboard-list li {
+  margin-bottom: 0.5rem;
+}
+
+.global-message {
+  min-height: 1.25rem;
+  text-align: center;
+  color: #ffd484;
+  margin: 0;
+  padding: 0 1rem 1.5rem;
+}

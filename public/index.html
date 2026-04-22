@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cheeseman Games</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1>Cheeseman Games</h1>
+    <p>Play games, sign in, and push your score to the leaderboard.</p>
+  </header>
+
+  <main class="layout">
+    <section class="card" id="auth-card">
+      <h2>Account</h2>
+      <p id="auth-status">You are not signed in.</p>
+      <button id="logout-button" class="secondary" hidden>Log out</button>
+
+      <div class="form-grid">
+        <form id="register-form">
+          <h3>Create account</h3>
+          <label for="register-username">Username</label>
+          <input id="register-username" name="username" minlength="3" maxlength="24" required>
+
+          <label for="register-email">Email</label>
+          <input id="register-email" name="email" type="email" required>
+
+          <label for="register-password">Password</label>
+          <input id="register-password" name="password" type="password" minlength="8" required>
+
+          <button type="submit">Register</button>
+        </form>
+
+        <form id="login-form">
+          <h3>Sign in</h3>
+          <label for="login-identifier">Username or email</label>
+          <input id="login-identifier" name="identifier" required>
+
+          <label for="login-password">Password</label>
+          <input id="login-password" name="password" type="password" minlength="8" required>
+
+          <button type="submit">Login</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="card" id="game-card">
+      <h2>Game: Catch the Cheese</h2>
+      <p>Click the cheese as many times as possible before time runs out.</p>
+
+      <div class="game-stats">
+        <span>Time: <strong id="time-left">20</strong>s</span>
+        <span>Score: <strong id="current-score">0</strong></span>
+      </div>
+
+      <button id="start-game-button">Start game</button>
+      <p id="game-message"></p>
+
+      <div id="game-area" aria-label="Game area">
+        <button id="cheese-button" hidden type="button" aria-label="Catch cheese">🧀</button>
+      </div>
+    </section>
+
+    <section class="card" id="leaderboard-card">
+      <div class="leaderboard-header">
+        <h2>Leaderboard</h2>
+        <button id="refresh-leaderboard-button" class="secondary">Refresh</button>
+      </div>
+      <ol id="leaderboard-list"></ol>
+    </section>
+  </main>
+
+  <p id="global-message" class="global-message"></p>
+  <script src="app.js"></script>
+</body>
+
+</html>
