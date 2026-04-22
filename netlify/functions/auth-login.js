@@ -1,4 +1,4 @@
-const { query } = require("./_lib/db");
+const { findUserByIdentifier } = require("./_lib/db");
 const { signToken, verifyPassword } = require("./_lib/auth");
 const {
   InputError,
@@ -24,20 +24,12 @@ exports.handler = async function handler(event) {
     const identifier = validateIdentifier(body.identifier).toLowerCase();
     const password = validatePassword(body.password);
 
-    const result = await query(
-      `SELECT id, username, email, password_hash
-       FROM users
-       WHERE lower(email) = $1 OR lower(username) = $1
-       LIMIT 1`,
-      [identifier]
-    );
-
-    if (!result.rows[0]) {
+    const userRow = await findUserByIdentifier(identifier);
+    if (!userRow) {
       return unauthorized("Invalid credentials.");
     }
 
-    const userRow = result.rows[0];
-    const passwordMatches = await verifyPassword(password, userRow.password_hash);
+    const passwordMatches = await verifyPassword(password, userRow.passwordHash);
     if (!passwordMatches) {
       return unauthorized("Invalid credentials.");
     }

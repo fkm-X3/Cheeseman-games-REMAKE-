@@ -9,13 +9,13 @@ A simple game site designed for Netlify hosting with a Node.js backend running a
 - JWT session token flow
 - Score submission API
 - Leaderboard API (top scores per user)
-- Supabase Postgres persistence
+- Firebase Firestore persistence
 
 ## Tech stack
 
 - Frontend: HTML, CSS, vanilla JS (`public/`)
 - Backend: Node.js Netlify Functions (`netlify/functions/`)
-- Database: Supabase Postgres (`supabase/schema.sql`)
+- Database: Firebase Firestore
 
 ## Project structure
 
@@ -37,20 +37,23 @@ netlify/
     auth-me.js
     leaderboard-submit.js
     leaderboard-top.js
-supabase/
-  schema.sql
 ```
 
 ## Environment variables
 
 Copy `.env.example` to `.env` and set:
 
-- `SUPABASE_DB_URL` - Postgres connection string from Supabase
+- `FIREBASE_PROJECT_ID` - Firebase project ID
+- `FIREBASE_CLIENT_EMAIL` - service account client email
+- `FIREBASE_PRIVATE_KEY` - service account private key (keep `\n` escapes in env value)
 - `JWT_SECRET` - long random secret for signing JWTs
 
 ## Database setup
 
-Run the SQL in `supabase/schema.sql` against your Supabase database.
+1. Create a Firebase project and enable Firestore (Native mode).
+2. Create a service account key in Firebase Console.
+3. Set `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, and `FIREBASE_PRIVATE_KEY` from that key.
+4. Collections are created automatically when the API writes data.
 
 ## Local development
 
@@ -84,5 +87,5 @@ Through Netlify redirects:
 
 1. Push repository to GitHub.
 2. Connect the repo in Netlify.
-3. Set environment variables (`SUPABASE_DB_URL`, `JWT_SECRET`) in Netlify site settings.
+3. Set environment variables (`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `JWT_SECRET`) in Netlify site settings.
 4. Deploy.

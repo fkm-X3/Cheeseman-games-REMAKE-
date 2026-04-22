@@ -1,4 +1,4 @@
-const { query } = require("./_lib/db");
+const { createUser, DuplicateUserError } = require("./_lib/db");
 const { hashPassword, signToken } = require("./_lib/auth");
 const {
   InputError,
@@ -27,14 +27,11 @@ exports.handler = async function handler(event) {
     const password = validatePassword(body.password);
     const passwordHash = await hashPassword(password);
 
-    const result = await query(
-      `INSERT INTO users (username, email, password_hash)
-       VALUES ($1, $2, $3)
-       RETURNING id, username, email`,
-      [username, email, passwordHash]
-    );
-
-    const user = result.rows[0];
+    const user = await createUser({
+      username,
+      email,
+      passwordHash,
+    });
     const token = signToken(user);
 
     return created({
@@ -45,7 +42,7 @@ exports.handler = async function handler(event) {
     if (error instanceof InputError) {
       return badRequest(error.message);
     }
-    if (error.code === "23505") {
+    if (error instanceof DuplicateUserError) {
       return conflict("Username or email already exists.");
     }
     return internalError(error, "auth-register");

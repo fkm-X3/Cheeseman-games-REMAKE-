@@ -1,4 +1,4 @@
-const { query } = require("./_lib/db");
+const { findUserById, submitScore } = require("./_lib/db");
 const { readAuthToken, verifyToken } = require("./_lib/auth");
 const {
   InputError,
@@ -36,22 +36,21 @@ exports.handler = async function handler(event) {
     const score = validateScore(body.score);
     const gameKey = validateGameKey(body.gameKey);
 
-    await query(
-      `INSERT INTO scores (user_id, game_key, score)
-       VALUES ($1, $2, $3)`,
-      [payload.sub, gameKey, score]
-    );
+    const user = await findUserById(payload.sub);
+    if (!user) {
+      return unauthorized("User no longer exists.");
+    }
 
-    const bestResult = await query(
-      `SELECT MAX(score)::int AS best_score
-       FROM scores
-       WHERE user_id = $1 AND game_key = $2`,
-      [payload.sub, gameKey]
-    );
+    const personalBest = await submitScore({
+      userId: payload.sub,
+      username: user.username,
+      gameKey,
+      score,
+    });
 
     return created({
       submittedScore: score,
-      personalBest: bestResult.rows[0].best_score || score,
+      personalBest,
       gameKey,
     });
   } catch (error) {

@@ -28,8 +28,8 @@
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2",
-    "pg": "^8.16.0"
+    "firebase-admin": "^13.8.0",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "netlify-cli": "^17.38.0"

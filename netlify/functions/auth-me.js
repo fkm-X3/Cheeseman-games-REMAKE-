@@ -1,4 +1,4 @@
-const { query } = require("./_lib/db");
+const { findUserById } = require("./_lib/db");
 const { readAuthToken, verifyToken } = require("./_lib/auth");
 const { ok, unauthorized, methodNotAllowed, internalError } = require("./_lib/response");
 
@@ -20,20 +20,13 @@ exports.handler = async function handler(event) {
       return unauthorized("Invalid token.");
     }
 
-    const result = await query(
-      `SELECT id, username, email
-       FROM users
-       WHERE id = $1
-       LIMIT 1`,
-      [payload.sub]
-    );
-
-    if (!result.rows[0]) {
+    const user = await findUserById(payload.sub);
+    if (!user) {
       return unauthorized("User no longer exists.");
     }
 
     return ok({
-      user: result.rows[0],
+      user,
     });
   } catch (error) {
     return internalError(error, "auth-me");
