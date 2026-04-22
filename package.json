@@ -22,7 +22,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --test"
+    "test": "node --test",
+    "firebase:deploy:rules": "npx firebase-tools deploy --only firestore:rules"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

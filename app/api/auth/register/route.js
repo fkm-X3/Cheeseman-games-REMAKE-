@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { createUser, DuplicateUserError } from "../../../../lib/server/db.mjs";
 import { hashPassword, signToken } from "../../../../lib/server/auth.mjs";
 import {
+  assertWriteOriginAllowed,
+  OriginNotAllowedError,
+} from "../../../../lib/server/security.mjs";
+import {
   InputError,
   parseJsonBody,
   validateEmail,
@@ -13,6 +17,8 @@ export const runtime = "nodejs";
 
 export async function POST(request) {
   try {
+    assertWriteOriginAllowed(request);
+
     const body = await parseJsonBody(request);
     const username = validateUsername(body.username);
     const email = validateEmail(body.email);
@@ -34,6 +40,9 @@ export async function POST(request) {
       { status: 201 }
     );
   } catch (error) {
+    if (error instanceof OriginNotAllowedError) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
     if (error instanceof InputError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }

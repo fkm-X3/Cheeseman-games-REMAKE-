@@ -1,0 +1,50 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isValidGameKey(value) {
+      return value is string && value.size() >= 3 && value.size() <= 40
+        && value.matches('^[a-z0-9-]+$');
+    }
+
+    function isValidUsername(value) {
+      return value is string && value.size() >= 3 && value.size() <= 24
+        && value.matches('^[A-Za-z0-9_]+$');
+    }
+
+    function isValidScore(value) {
+      return value is int && value >= 0 && value <= 1000000;
+    }
+
+    function isLeaderboardEntry(data) {
+      return data.keys().hasOnly(['userId', 'gameKey', 'username', 'score', 'updatedAt'])
+        && data.userId is string
+        && data.userId.size() > 0
+        && isValidGameKey(data.gameKey)
+        && isValidUsername(data.username)
+        && isValidScore(data.score)
+        && data.updatedAt is timestamp;
+    }
+
+    match /userGameBest/{entryId} {
+      allow read: if isLeaderboardEntry(resource.data);
+      allow write: if false;
+    }
+
+    match /users/{userId} {
+      allow read, write: if false;
+    }
+
+    match /userLookups/{lookupId} {
+      allow read, write: if false;
+    }
+
+    match /scores/{scoreId} {
+      allow read, write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { findUserById, submitScore } from "../../../../lib/server/db.mjs";
 import { readAuthToken, verifyToken } from "../../../../lib/server/auth.mjs";
 import {
+  assertWriteOriginAllowed,
+  OriginNotAllowedError,
+} from "../../../../lib/server/security.mjs";
+import {
   InputError,
   parseJsonBody,
   validateScore,
@@ -12,6 +16,8 @@ export const runtime = "nodejs";
 
 export async function POST(request) {
   try {
+    assertWriteOriginAllowed(request);
+
     const token = readAuthToken(request.headers.get("authorization"));
     if (!token) {
       return NextResponse.json({ error: "Missing bearer token." }, { status: 401 });
@@ -49,6 +55,9 @@ export async function POST(request) {
       { status: 201 }
     );
   } catch (error) {
+    if (error instanceof OriginNotAllowedError) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
     if (error instanceof InputError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
