@@ -26,6 +26,7 @@
     "firebase:deploy:rules": "npx firebase-tools deploy --only firestore:rules"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "bcryptjs": "^2.4.3",
     "firebase-admin": "^13.8.0",
     "jsonwebtoken": "^9.0.2",
