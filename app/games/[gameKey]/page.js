@@ -35,17 +35,6 @@ function GamePage() {
   const gameAreaRef = useRef(null);
   const cheeseButtonRef = useRef(null);
 
-  const setSessionToken = useCallback((nextToken) => {
-    setToken(nextToken);
-    if (typeof window !== "undefined") {
-      if (nextToken) {
-        window.localStorage.setItem("authToken", nextToken);
-      } else {
-        window.localStorage.removeItem("authToken");
-      }
-    }
-  }, []);
-
   const api = useCallback(
     async (path, options = {}) => {
       const method = options.method || "GET";
@@ -88,11 +77,10 @@ function GamePage() {
       const payload = await api("/api/auth/me");
       setUser(payload.user || null);
     } catch (error) {
-      setSessionToken(null);
       setUser(null);
       setGlobalMessage(getErrorMessage(error));
     }
-  }, [api, setSessionToken, token]);
+  }, [api, token]);
 
   const loadLeaderboard = useCallback(async () => {
     try {
@@ -242,57 +230,6 @@ function GamePage() {
     moveCheeseButton();
   }
 
-  async function handleRegister(event) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    try {
-      const payload = await api("/api/auth/register", {
-        method: "POST",
-        auth: false,
-        body: {
-          username: String(formData.get("username") || ""),
-          email: String(formData.get("email") || ""),
-          password: String(formData.get("password") || ""),
-        },
-      });
-      setSessionToken(payload.token || null);
-      setUser(payload.user || null);
-      event.currentTarget.reset();
-      setGlobalMessage("Account created and signed in.");
-      await loadLeaderboard();
-    } catch (error) {
-      setGlobalMessage(getErrorMessage(error));
-    }
-  }
-
-  async function handleLogin(event) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    try {
-      const payload = await api("/api/auth/login", {
-        method: "POST",
-        auth: false,
-        body: {
-          identifier: String(formData.get("identifier") || ""),
-          password: String(formData.get("password") || ""),
-        },
-      });
-      setSessionToken(payload.token || null);
-      setUser(payload.user || null);
-      event.currentTarget.reset();
-      setGlobalMessage("Signed in.");
-      await loadLeaderboard();
-    } catch (error) {
-      setGlobalMessage(getErrorMessage(error));
-    }
-  }
-
-  function handleLogout() {
-    setSessionToken(null);
-    setUser(null);
-    setGlobalMessage("Signed out.");
-  }
-
   return (
     <>
       <div style={{ padding: "1rem 1.25rem" }}>
@@ -302,53 +239,19 @@ function GamePage() {
       </div>
 
       <main className="layout">
-        <section className="card" id="auth-card">
-          <h2>Account</h2>
-          <p id="auth-status">
-            {user ? `Signed in as ${user.username}` : "You are not signed in."}
+        <section className="card" id="user-status-card">
+          <h2>Game Status</h2>
+          <p id="user-status" style={{ color: "#b8bfff" }}>
+            {user ? `Signed in as ${user.username}` : "Not signed in"}
           </p>
-          <button
-            id="logout-button"
-            className="secondary"
-            hidden={!user}
-            onClick={handleLogout}
-            type="button"
-          >
-            Log out
-          </button>
-
-          <div className="form-grid">
-            <form id="register-form" onSubmit={handleRegister}>
-              <h3>Create account</h3>
-              <label htmlFor="register-username">Username</label>
-              <input id="register-username" name="username" minLength={3} maxLength={24} required />
-
-              <label htmlFor="register-email">Email</label>
-              <input id="register-email" name="email" type="email" required />
-
-              <label htmlFor="register-password">Password</label>
-              <input
-                id="register-password"
-                name="password"
-                type="password"
-                minLength={8}
-                required
-              />
-
-              <button type="submit">Register</button>
-            </form>
-
-            <form id="login-form" onSubmit={handleLogin}>
-              <h3>Sign in</h3>
-              <label htmlFor="login-identifier">Username or email</label>
-              <input id="login-identifier" name="identifier" required />
-
-              <label htmlFor="login-password">Password</label>
-              <input id="login-password" name="password" type="password" minLength={8} required />
-
-              <button type="submit">Login</button>
-            </form>
-          </div>
+          {!user && (
+            <p style={{ color: "#ffd484", marginTop: "0.75rem" }}>
+              <a href="/account" style={{ color: "#5372ff", textDecoration: "none" }}>
+                Sign in
+              </a>{" "}
+              to submit scores and compete on leaderboards.
+            </p>
+          )}
         </section>
 
         <section className="card" id="game-card">
