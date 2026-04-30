@@ -1,0 +1,14 @@
+/* Cube Combat Game Styles Module */
+
+/* This module provides CSS for the Cube Combat game page */
+.gameContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.gameWrapper {
+  width: 100%;
+}

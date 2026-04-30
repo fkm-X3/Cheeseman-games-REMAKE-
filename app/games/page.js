@@ -8,6 +8,12 @@ export default function GamesHubPage() {
       icon: "🧀",
       description: "Click the bouncing cheese as many times as possible before time runs out. Quick reflexes required!",
     },
+    {
+      key: "cube-combat",
+      name: "Cube Combat",
+      icon: "⚔️",
+      description: "Engage in intense battles between animated cubes with unique abilities. Master multiple fighters and unlock achievements!",
+    },
   ];
 
   return (
