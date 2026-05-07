@@ -1,10 +1,10 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getLeaderboard } from "../../../../lib/server/db.mjs";
+import { getLeaderboard } from "../../../../lib/server/db";
 import {
   InputError,
   validateGameKey,
   parseLimit,
-} from "../../../../lib/server/validation.mjs";
+} from "../../../../lib/server/validation";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

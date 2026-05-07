@@ -1,12 +1,12 @@
 import { NextResponse, NextRequest } from "next/server";
-import { findUserByIdentifier } from "../../../../lib/server/db.mjs";
-import { signToken, verifyPassword } from "../../../../lib/server/auth.mjs";
+import { findUserByIdentifier } from "../../../../lib/server/db";
+import { signToken, verifyPassword } from "../../../../lib/server/auth";
 import {
   InputError,
   parseJsonBody,
   validateIdentifier,
   validatePassword,
-} from "../../../../lib/server/validation.mjs";
+} from "../../../../lib/server/validation";
 
 export const runtime = "nodejs";
 

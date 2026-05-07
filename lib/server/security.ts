@@ -31,7 +31,7 @@ function parseConfiguredOrigins(configuredOrigins) {
     .filter(Boolean);
 }
 
-export function getAllowedWriteOrigins(options = {}) {
+export function getAllowedWriteOrigins(options: any = {}) {
   const nodeEnv = options.nodeEnv ?? process.env.NODE_ENV;
   const configuredOrigins = options.configuredOrigins ?? process.env.ALLOWED_WRITE_ORIGINS;
 
@@ -48,7 +48,7 @@ export function getAllowedWriteOrigins(options = {}) {
   return defaults;
 }
 
-export function assertWriteOriginAllowed(request, options = {}) {
+export function assertWriteOriginAllowed(request: any, options: any = {}) {
   const origin = normalizeOrigin(request.headers.get("origin"));
   if (!origin) {
     throw new OriginNotAllowedError();

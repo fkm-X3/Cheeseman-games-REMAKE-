@@ -1,6 +1,6 @@
 import { initializeApp, cert, getApps } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
-import { requireEnv } from "./env.mjs";
+import { requireEnv } from "./env";
 
 const USERS_COLLECTION = "users";
 const USER_LOOKUPS_COLLECTION = "userLookups";

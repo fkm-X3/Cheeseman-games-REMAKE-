@@ -1,17 +1,17 @@
 import { NextResponse, NextRequest } from "next/server";
-import { createUser, DuplicateUserError } from "../../../../lib/server/db.mjs";
-import { hashPassword, signToken } from "../../../../lib/server/auth.mjs";
+import { createUser, DuplicateUserError } from "../../../../lib/server/db";
+import { hashPassword, signToken } from "../../../../lib/server/auth";
 import {
   assertWriteOriginAllowed,
   OriginNotAllowedError,
-} from "../../../../lib/server/security.mjs";
+} from "../../../../lib/server/security";
 import {
   InputError,
   parseJsonBody,
   validateEmail,
   validateUsername,
   validatePassword,
-} from "../../../../lib/server/validation.mjs";
+} from "../../../../lib/server/validation";
 
 export const runtime = "nodejs";
 

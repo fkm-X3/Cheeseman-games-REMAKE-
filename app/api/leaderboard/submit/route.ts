@@ -1,16 +1,16 @@
 import { NextResponse, NextRequest } from "next/server";
-import { findUserById, submitScore } from "../../../../lib/server/db.mjs";
-import { readAuthToken, verifyToken } from "../../../../lib/server/auth.mjs";
+import { findUserById, submitScore } from "../../../../lib/server/db";
+import { readAuthToken, verifyToken } from "../../../../lib/server/auth";
 import {
   assertWriteOriginAllowed,
   OriginNotAllowedError,
-} from "../../../../lib/server/security.mjs";
+} from "../../../../lib/server/security";
 import {
   InputError,
   parseJsonBody,
   validateScore,
   validateGameKey,
-} from "../../../../lib/server/validation.mjs";
+} from "../../../../lib/server/validation";
 
 export const runtime = "nodejs";
 

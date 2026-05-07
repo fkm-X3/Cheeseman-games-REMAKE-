@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
-import { findUserById } from "../../../../lib/server/db.mjs";
-import { readAuthToken, verifyToken } from "../../../../lib/server/auth.mjs";
+import { findUserById } from "../../../../lib/server/db";
+import { readAuthToken, verifyToken } from "../../../../lib/server/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

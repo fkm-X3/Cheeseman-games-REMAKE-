@@ -5,7 +5,7 @@ import {
   OriginNotAllowedError,
   assertWriteOriginAllowed,
   getAllowedWriteOrigins,
-} from "../lib/server/security.mjs";
+} from "../lib/server/security";
 
 function buildRequest(origin) {
   return {

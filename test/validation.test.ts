@@ -7,7 +7,7 @@ import {
   validateGameKey,
   validateScore,
   parseLimit,
-} from "../lib/server/validation.mjs";
+} from "../lib/server/validation";
 
 function buildRequest(bodyText) {
   return {

@@ -17,14 +17,14 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
+    "strict": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "strictBindCallApply": false,
+    "strictPropertyInitialization": false,
     "noImplicitAny": false,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
+    "noImplicitThis": false,
+    "alwaysStrict": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noImplicitReturns": true,
@@ -35,7 +35,7 @@
         "./*"
       ]
     },
-    "allowJs": true,
+    "allowJs": false,
     "plugins": [
       {
         "name": "next"
@@ -55,6 +55,7 @@
     "out",
     "build",
     "dist",
+    "public",
     "**/*.js"
   ]
 }

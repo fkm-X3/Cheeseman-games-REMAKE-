@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { requireEnv } from "./env.mjs";
+import { requireEnv } from "./env";
 
 const TOKEN_LIFETIME = "7d";
 
