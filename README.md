@@ -50,9 +50,6 @@ Copy `.env.example` to `.env.local` and set:
 - `FIREBASE_PRIVATE_KEY` - service account private key (keep `\n` escapes in env value)
 - `JWT_SECRET` - long random secret for signing JWTs
 - `ALLOWED_WRITE_ORIGINS` - optional comma-separated override for write route origin checks (defaults to `https://cheeseman-games-remake.vercel.app`; localhost is also allowed outside production)
-- `SENDGRID_API_KEY` - SendGrid API key used to send password-reset emails
-- `EMAIL_FROM` - email address used as the sender for reset emails (e.g., `no-reply@example.com`)
-- `SITE_URL` - Public site URL used to build reset links (e.g., `https://example.com`)
 
 ## Local development
 

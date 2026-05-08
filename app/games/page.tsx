@@ -19,9 +19,9 @@ const GamesHubPage: FC = () => {
     },
     {
       key: "cube-combat",
-      name: "OUT OF SERVICE",
+      name: "Cube Combat",
       icon: "⚔️",
-      description: "(THIS GAME IS CURRENTLY BROKEN)  Engage in intense battles between animated cubes with unique abilities. Master multiple fighters and unlock achievements!",
+      description: "Engage in intense battles between animated cubes with unique abilities. Master multiple fighters and unlock achievements!",
     },
   ];
 

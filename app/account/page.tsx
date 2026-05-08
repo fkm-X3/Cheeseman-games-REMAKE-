@@ -345,11 +345,6 @@ export default function AccountPage() {
                 >
                   Sign In
                 </button>
-                <p style={{ marginTop: "0.75rem", textAlign: "center" }}>
-                  <a href="/account/forgot-password" style={{ color: "#9fb0ff", textDecoration: "none" }}>
-                    Forgot your password?
-                  </a>
-                </p>
               </form>
             </div>
           )}
