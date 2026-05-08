@@ -5,7 +5,7 @@ import {
   OriginNotAllowedError,
   assertWriteOriginAllowed,
   getAllowedWriteOrigins,
-} from "../lib/server/security";
+} from "../lib/server/security.ts";
 
 function buildRequest(origin) {
   return {

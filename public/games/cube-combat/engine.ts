@@ -1,4 +1,5 @@
-// @ts-nocheck
+
+// @ts-nocheck
 // TypeScript Game Engine Type Definitions
 interface GameCubeData {
   id: number;
@@ -2951,13 +2952,21 @@ function startGame(mode, modeInfo) {
 
         
         navTo('game-container');
-        document.getElementById('ui-layer').style.display = 'flex';
-        document.querySelector('.sidebar').style.display = 'none';
-        document.getElementById('game-over-screen').classList.add('hidden'); 
-        document.getElementById('menu-overlay').style.pointerEvents = 'none'; 
+        const uiLayer = document.getElementById('ui-layer');
+        if (uiLayer) uiLayer.style.display = 'flex';
+        const sidebars = document.querySelectorAll('.sidebar');
+        sidebars.forEach(sb => sb.style.display = 'none');
+        
+        const gameOverScreen = document.getElementById('game-over-screen');
+        if (gameOverScreen) gameOverScreen.classList.add('hidden');
+        
+        const menuOverlay = document.getElementById('menu-overlay');
+        if (menuOverlay) menuOverlay.style.pointerEvents = 'none';
 
-        document.getElementById('rainbow-overlay').classList.remove('active');
-        document.getElementById('rainbow-text').innerText = "";
+        const overtimeOverlay = document.getElementById('overtime-overlay');
+        if (overtimeOverlay) overtimeOverlay.classList.remove('active');
+        const rainbowText = document.getElementById('rainbow-text');
+        if (rainbowText) rainbowText.innerText = "";
 
         
         const CubeClass = getClassForId(selectedCubeId);
@@ -3136,19 +3145,27 @@ function updateUI() {
     const p1Pct = (blueCube.hp / blueCube.maxHp) * 100;
     const p2Pct = ((this.target || redCube).hp / (this.target || redCube).maxHp) * 100;
 
-    document.getElementById('p1-health').style.width = Math.max(0, p1Pct) + '%';
-    document.getElementById('p2-health').style.width = Math.max(0, p2Pct) + '%';
+    const p1HealthEl = document.getElementById('p1-health');
+    if (p1HealthEl) p1HealthEl.style.width = Math.max(0, p1Pct) + '%';
+    
+    const p2HealthEl = document.getElementById('p2-health');
+    if (p2HealthEl) p2HealthEl.style.width = Math.max(0, p2Pct) + '%';
 
-    document.getElementById('p1-hp-text').innerText = Math.ceil(blueCube.hp);
-    document.getElementById('p2-hp-text').innerText = Math.ceil((this.target || redCube).hp);
+    const p1HpText = document.getElementById('p1-hp-text');
+    if (p1HpText) p1HpText.innerText = Math.ceil(blueCube.hp);
+    
+    const p2HpText = document.getElementById('p2-hp-text');
+    if (p2HpText) p2HpText.innerText = Math.ceil((this.target || redCube).hp);
 
     
-    const comboBox = document.getElementById('combo-box');
-    if (sessionStats.womboComboHits > 1) {
-        comboBox.style.display = 'flex';
-        comboBox.innerText = sessionStats.womboComboHits;
-    } else {
-        comboBox.style.display = 'none';
+    const comboBox = document.getElementById('p1-combo');
+    if (comboBox) {
+        if (sessionStats.womboComboHits > 1) {
+            comboBox.style.display = 'flex';
+            comboBox.innerText = sessionStats.womboComboHits;
+        } else {
+            comboBox.style.display = 'none';
+        }
     }
 }
 

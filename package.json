@@ -1,6 +1,7 @@
 {
   "name": "cheeseman-remake",
   "version": "1.0.0",
+  "type": "module",
   "description": "Next.js game site with Vercel-ready API routes",
   "keywords": [
     "games",
@@ -22,7 +23,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --test --loader ts-node/esm",
+    "test": "node --test -r ts-node/register",
     "type-check": "tsc --noEmit",
     "firebase:deploy:rules": "npx firebase-tools deploy --only firestore:rules"
   },
