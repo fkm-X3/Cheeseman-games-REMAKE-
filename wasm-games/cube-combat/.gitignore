@@ -1,0 +1,6 @@
+/pkg
+/target
+node_modules
+*.wasm
+*.log
+.DS_Store
