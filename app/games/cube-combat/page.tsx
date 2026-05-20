@@ -5,79 +5,94 @@ import { useEffect, useRef, useState, type FC, type CSSProperties } from "react"
 const CubeCombatPage: FC = () => {
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);
+  const animFrameRef = useRef<number | null>(null);
+  const wasmModuleRef = useRef<{
+    init_game: (canvas_id: string) => void;
+    game_loop: () => void;
+    handle_key_down: (key: string) => void;
+    handle_key_up: (key: string) => void;
+    restart_game: () => void;
+  } | null>(null);
 
   useEffect(() => {
-    const loadGameScripts = async (): Promise<void> => {
-      if (!(window as any).Peer) {
-        const peerScript = document.createElement("script");
-        peerScript.src = "https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js";
-        peerScript.async = true;
+    let cancelled = false;
 
-        await new Promise<void>((resolve) => {
-          peerScript.onload = () => resolve();
-          peerScript.onerror = () => {
-            console.warn("PeerJS failed to load, P2P features may not work");
-            resolve();
-          };
-          document.head.appendChild(peerScript);
-        });
-      }
+    const loadWasm = async (): Promise<void> => {
+      try {
+        const wasmPath = "/games/cube-combat/cube_combat_wasm.js";
+        const wasmModule = await import(/* webpackIgnore: true */ wasmPath);
 
-      const cssLink = document.createElement("link");
-      cssLink.rel = "stylesheet";
-      cssLink.href = "/games/cube-combat/styles.css";
-      document.head.appendChild(cssLink);
+        if (cancelled) return;
 
-      const gameScript = document.createElement("script");
-      gameScript.src = "/games/cube-combat/engine.js";
-      gameScript.async = false;
-      gameScript.onload = () => {
-        console.log("Cube Combat loaded successfully");
+        await wasmModule.default({ module_or_path: "/games/cube-combat/cube_combat_wasm_bg.wasm" });
+
+        if (cancelled) return;
+
+        wasmModuleRef.current = {
+          init_game: wasmModule.init_game,
+          game_loop: wasmModule.game_loop,
+          handle_key_down: wasmModule.handle_key_down,
+          handle_key_up: wasmModule.handle_key_up,
+          restart_game: wasmModule.restart_game,
+        };
+
+        wasmModule.init_game("gameCanvas");
         setIsReady(true);
-      };
-      gameScript.onerror = () => {
-        console.error("Failed to load Cube Combat game engine");
+
+        const loop = () => {
+          if (wasmModuleRef.current) {
+            wasmModuleRef.current.game_loop();
+          }
+          animFrameRef.current = requestAnimationFrame(loop);
+        };
+        animFrameRef.current = requestAnimationFrame(loop);
+      } catch (err) {
+        console.error("Failed to load WASM:", err);
         setIsReady(false);
-      };
-      document.body.appendChild(gameScript);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (wasmModuleRef.current) {
+        wasmModuleRef.current.handle_key_down(e.key);
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (wasmModuleRef.current) {
+        wasmModuleRef.current.handle_key_up(e.key);
+      }
     };
 
     const timer = setTimeout(() => {
-      void loadGameScripts();
+      void loadWasm();
     }, 100);
 
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
     return () => {
+      cancelled = true;
       clearTimeout(timer);
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
       const elementsToRemove = ["gameCanvas", "menu-overlay", "game-container"];
       elementsToRemove.forEach((id) => {
         const el = document.getElementById(id);
         if (el) el.remove();
       });
+      wasmModuleRef.current = null;
     };
   }, []);
-
-  const callWindowFunction = (functionName: string, ...args: unknown[]): void => {
-    const fn = (window as any)[functionName];
-    if (typeof fn === "function") {
-      fn(...args);
-    }
-  };
 
   const containerStyle: CSSProperties = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-  };
-
-  const inputStyle: CSSProperties = {
-    backgroundColor: "#333",
-    border: "2px solid #5372ff",
-    color: "#fff",
-    padding: "10px",
-    borderRadius: "4px",
-    fontSize: "14px",
-    width: "200px",
   };
 
   return (
@@ -148,38 +163,20 @@ const CubeCombatPage: FC = () => {
               <div id="overtime-overlay" className="rainbow-overlay"></div>
               <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-              <div id="achievement-toast">
-                <div className="toast-icon">🏆</div>
-                <div className="toast-text">
-                  <div className="toast-title">ACHIEVEMENT UNLOCKED</div>
-                  <div id="toast-message">First Blood</div>
-                </div>
-              </div>
-
-              <div id="sandbox-menu">
-                <div className="sb-header">Sandbox Control Panel</div>
+              {!isReady && (
                 <div
                   style={{
-                    textAlign: "center",
-                    marginBottom: "10px",
-                    color: "#aaa",
-                    fontStyle: "italic",
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    color: "#fff",
+                    fontSize: "18px",
                   }}
                 >
-                  Press &apos;R&apos; to toggle this menu
+                  Loading WASM...
                 </div>
-                <div className="sb-content">
-                  <div className="sb-list" id="sb-cube-list"></div>
-                  <div className="sb-details" id="sb-details-pane"></div>
-                </div>
-                <button
-                  className="btn btn-gray"
-                  style={{ width: "100%", marginTop: "10px", padding: "10px" }}
-                  onClick={() => callWindowFunction("toggleSandboxMenu")}
-                >
-                  CLOSE MENU
-                </button>
-              </div>
+              )}
 
               <div id="ui-layer">
                 <div className="hud" id="hud">
@@ -189,21 +186,6 @@ const CubeCombatPage: FC = () => {
                     </div>
                     <div className="health-bar-container">
                       <div id="p1-health" className="health-bar"></div>
-                      <div
-                        id="p1-minion-health"
-                        className="health-bar"
-                        style={{
-                          backgroundColor: "#888",
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "0%",
-                          display: "none",
-                        }}
-                      ></div>
-                    </div>
-                    <div id="p1-combo" className="combo-box">
-                      0
                     </div>
                   </div>
                   <div style={{ textAlign: "right" }}>
@@ -214,299 +196,6 @@ const CubeCombatPage: FC = () => {
                       <div id="p2-health" className="health-bar"></div>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              <div id="menu-overlay">
-                <div id="screen-main" className="menu-screen active">
-                  <div className="menu-title">CUBE COMBAT</div>
-
-                  <button
-                    className="btn btn-green"
-                    onClick={() => callWindowFunction("navTo", "screen-modes")}
-                  >
-                    START GAME
-                  </button>
-                  <button
-                    className="btn btn-blue"
-                    onClick={() => callWindowFunction("prepareGame", null, "screen-main")}
-                  >
-                    COLLECTED CUBES
-                  </button>
-                  <button
-                    className="btn btn-pink"
-                    onClick={() => {
-                      callWindowFunction("navTo", "screen-achievements");
-                      callWindowFunction("renderAchievements");
-                    }}
-                  >
-                    ACHIEVEMENTS
-                  </button>
-                  <button
-                    className="btn btn-red"
-                    onClick={() => callWindowFunction("confirmResetProgress")}
-                  >
-                    RESET PROGRESS
-                  </button>
-                  <button
-                    className="btn btn-gray"
-                    onClick={() => {
-                      window.location.href = "/games";
-                    }}
-                  >
-                    QUIT
-                  </button>
-                </div>
-
-                <div id="screen-modes" className="menu-screen">
-                  <div className="sub-title">SELECT GAME MODE</div>
-
-                  <button
-                    className="btn btn-red"
-                    onClick={() => callWindowFunction("prepareGame", "ai", "screen-modes")}
-                  >
-                    PLAYER VS AI
-                  </button>
-                  <button
-                    className="btn btn-blue"
-                    onClick={() => callWindowFunction("navTo", "screen-pvp-submenu")}
-                  >
-                    PLAYER VS PLAYER
-                  </button>
-                  <div style={{ height: "20px" }}></div>
-                  <button
-                    className="btn btn-gray"
-                    onClick={() => callWindowFunction("navTo", "screen-main")}
-                  >
-                    BACK
-                  </button>
-                </div>
-
-                <div id="screen-pvp-submenu" className="menu-screen">
-                  <div className="sub-title">PLAYER VS PLAYER</div>
-
-                  <button
-                    className="btn btn-blue"
-                    onClick={() => callWindowFunction("prepareGame", "pvp", "screen-pvp-submenu")}
-                  >
-                    LOCAL MULTIPLAYER
-                  </button>
-                  <button
-                    className="btn btn-cyan"
-                    onClick={() => callWindowFunction("prepareGame", "p2p_setup", "screen-pvp-submenu")}
-                  >
-                    P2P MULTIPLAYER
-                  </button>
-                  <div style={{ height: "20px" }}></div>
-                  <button
-                    className="btn btn-gray"
-                    onClick={() => callWindowFunction("navTo", "screen-modes")}
-                  >
-                    BACK
-                  </button>
-                </div>
-
-                <div id="screen-p2p-lobby" className="menu-screen">
-                  <div className="sub-title">P2P LOBBY</div>
-
-                  <div id="p2p-status-msg" className="p2p-status">
-                    Select Host or Join
-                  </div>
-
-                  <div id="p2p-host-section" style={{ display: "none", textAlign: "center" }}>
-                    <div style={{ color: "#aaa", fontSize: "14px" }}>
-                      Share this ID with your friend:
-                    </div>
-                    <input
-                      type="text"
-                      id="host-id-display"
-                      className="p2p-input"
-                      readOnly
-                      value="Generating ID..."
-                      onClick={(e) => {
-                        const target = e.target as HTMLInputElement;
-                        target.select();
-                      }}
-                      style={inputStyle}
-                    />
-                    <div style={{ color: "#00aa00", marginTop: "5px" }}>
-                      Waiting for connection...
-                    </div>
-                  </div>
-
-                  <div id="p2p-join-section" style={{ display: "none", textAlign: "center" }}>
-                    <div style={{ color: "#aaa", fontSize: "14px" }}>
-                      Enter Host ID:
-                    </div>
-                    <input
-                      type="text"
-                      id="join-id-input"
-                      className="p2p-input"
-                      placeholder="Paste ID here"
-                      style={inputStyle}
-                    />
-                    <button
-                      className="btn btn-green"
-                      style={{ width: "200px", margin: "10px auto" }}
-                      onClick={() => callWindowFunction("connectToHost")}
-                    >
-                      CONNECT
-                    </button>
-                  </div>
-
-                  <div id="p2p-buttons">
-                    <button
-                      className="btn btn-orange"
-                      onClick={() => callWindowFunction("initP2PHost")}
-                    >
-                      HOST GAME
-                    </button>
-                    <button
-                      className="btn btn-cyan"
-                      onClick={() => callWindowFunction("initP2PJoin")}
-                    >
-                      JOIN GAME
-                    </button>
-                  </div>
-
-                  <div style={{ height: "20px" }}></div>
-                  <button
-                    className="btn btn-gray"
-                    onClick={() => {
-                      callWindowFunction("resetP2P");
-                      callWindowFunction("navTo", "screen-pvp-submenu");
-                    }}
-                  >
-                    BACK
-                  </button>
-                </div>
-
-                <div id="screen-cubes" className="menu-screen">
-                  <div className="sub-title">COLLECTED CUBES</div>
-                  <button
-                    className="btn btn-gray"
-                    style={{ width: "150px", position: "absolute", top: "20px", left: "20px" }}
-                    onClick={() => callWindowFunction("handleCubeBack")}
-                  >
-                    BACK (ESC)
-                  </button>
-
-                  <button
-                    id="btn-confirm-selection"
-                    className="btn btn-green"
-                    style={{
-                      width: "200px",
-                      position: "absolute",
-                      bottom: "20px",
-                      right: "20px",
-                      display: "none",
-                    }}
-                    onClick={() => callWindowFunction("confirmSelection")}
-                  >
-                    FIGHT!
-                  </button>
-
-                  <button
-                    className="btn btn-orange"
-                    style={{
-                      width: "200px",
-                      position: "absolute",
-                      top: "20px",
-                      right: "20px",
-                    }}
-                    onClick={() => callWindowFunction("startGame", "sandbox")}
-                  >
-                    SANDBOX MODE
-                  </button>
-
-                  <div className="cubes-layout">
-                    <div className="cubes-grid" id="cubes-grid-container"></div>
-                    <div className="cube-details" id="cube-details-panel">
-                      <div
-                        style={{
-                          textAlign: "center",
-                          marginTop: "50px",
-                          color: "#aaa",
-                        }}
-                      >
-                        Select a cube to view details
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div id="screen-achievements" className="menu-screen">
-                  <div className="sub-title">ACHIEVEMENTS</div>
-                  <button
-                    className="btn btn-gray"
-                    style={{ width: "150px", position: "absolute", top: "20px", left: "20px" }}
-                    onClick={() => callWindowFunction("navTo", "screen-main")}
-                  >
-                    BACK (ESC)
-                  </button>
-
-                  <div className="achievements-list" id="achievements-container"></div>
-                </div>
-
-                <div
-                  id="game-over-screen"
-                  className="hidden"
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    background: "rgba(0,0,0,0.9)",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    zIndex: 20,
-                  }}
-                >
-                  <div
-                    id="winner-text"
-                    style={{
-                      fontSize: "50px",
-                      marginBottom: "30px",
-                      fontWeight: "bold",
-                      color: "white",
-                    }}
-                  >
-                    WINNER
-                  </div>
-
-                  <button
-                    id="restart-btn"
-                    className="btn btn-green"
-                    onClick={() => callWindowFunction("requestRestart")}
-                  >
-                    RESTART (R)
-                  </button>
-
-                  <div
-                    id="waiting-msg"
-                    style={{
-                      display: "none",
-                      color: "yellow",
-                      fontSize: "24px",
-                      margin: "10px",
-                      fontWeight: "bold",
-                      textShadow: "1px 1px 0 #000",
-                    }}
-                  >
-                    WAITING FOR HOST TO RESTART...
-                  </div>
-
-                  <button
-                    className="btn btn-gray"
-                    onClick={() => {
-                      window.location.href = "/games";
-                    }}
-                  >
-                    MAIN MENU
-                  </button>
                 </div>
               </div>
             </div>
@@ -532,21 +221,6 @@ const CubeCombatPage: FC = () => {
                   <div className="sb-stat-label">Action Status</div>
                   <div id="p2-sb-status" className="sb-stat-value">
                     --
-                  </div>
-                </div>
-              </div>
-
-              <div id="p2-role-human" style={{ display: "none" }}>
-                <div className="sb-stat-box">
-                  <div className="sb-stat-label">Dash (K)</div>
-                  <div id="p2-sb-cd1" className="sb-stat-value">
-                    READY
-                  </div>
-                </div>
-                <div className="sb-stat-box">
-                  <div className="sb-stat-label">Laser (L)</div>
-                  <div id="p2-sb-cd2" className="sb-stat-value">
-                    READY
                   </div>
                 </div>
               </div>
