@@ -52,6 +52,17 @@ const CubeCombatPage: FC = () => {
         wasmModule.init_game("game-canvas");
         wasmModule.init_menu();
 
+        // Move WASM-created elements from body into the game wrapper for proper overlay positioning
+        const wrapper = document.getElementById("game-wrapper");
+        if (wrapper) {
+          ["menu-overlay", "screen-main", "screen-modes", "screen-cubes", "screen-achievements", "screen-pvp-submenu", "screen-p2p-lobby", "game-over-screen"].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el && el.parentNode !== wrapper) {
+              wrapper.appendChild(el);
+            }
+          });
+        }
+
         bindMenuHandlers(wasmModule);
 
         setIsReady(true);
