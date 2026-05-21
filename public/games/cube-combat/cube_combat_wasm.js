@@ -7,6 +7,13 @@ export function game_loop() {
     }
 }
 
+export function go_to_menu() {
+    const ret = wasm.go_to_menu();
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
 /**
  * @param {string} key
  */
@@ -31,6 +38,13 @@ export function handle_key_up(key) {
     }
 }
 
+export function hide_menu() {
+    const ret = wasm.hide_menu();
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
 /**
  * @param {string} canvas_id
  */
@@ -43,12 +57,65 @@ export function init_game(canvas_id) {
     }
 }
 
+export function init_menu() {
+    const ret = wasm.init_menu();
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
 export function main() {
     wasm.main();
 }
 
+/**
+ * @param {string} screen_id
+ */
+export function nav_to(screen_id) {
+    const ptr0 = passStringToWasm0(screen_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.nav_to(ptr0, len0);
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
+/**
+ * @param {string} mode
+ * @param {string} _from_screen
+ */
+export function prepare_game(mode, _from_screen) {
+    const ptr0 = passStringToWasm0(mode, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(_from_screen, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.prepare_game(ptr0, len0, ptr1, len1);
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
 export function restart_game() {
     const ret = wasm.restart_game();
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
+/**
+ * @param {string} winner
+ */
+export function show_game_over(winner) {
+    const ptr0 = passStringToWasm0(winner, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.show_game_over(ptr0, len0);
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
+export function show_menu() {
+    const ret = wasm.show_menu();
     if (ret[1]) {
         throw takeFromExternrefTable0(ret[0]);
     }
@@ -63,12 +130,24 @@ function __wbg_get_imports() {
         __wbg___wbindgen_throw_9c31b086c2b26051: function(arg0, arg1) {
             throw new Error(getStringFromWasm0(arg0, arg1));
         },
+        __wbg_appendChild_6e88800a9a8fb360: function() { return handleError(function (arg0, arg1) {
+            const ret = arg0.appendChild(arg1);
+            return ret;
+        }, arguments); },
         __wbg_arc_7f6431be39dd28c1: function() { return handleError(function (arg0, arg1, arg2, arg3, arg4, arg5) {
             arg0.arc(arg1, arg2, arg3, arg4, arg5);
         }, arguments); },
         __wbg_beginPath_0362b3134ed67152: function(arg0) {
             arg0.beginPath();
         },
+        __wbg_body_2ac005c657a3d103: function(arg0) {
+            const ret = arg0.body;
+            return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
+        },
+        __wbg_createElement_d10771800cfb6e7e: function() { return handleError(function (arg0, arg1, arg2) {
+            const ret = arg0.createElement(getStringFromWasm0(arg1, arg2));
+            return ret;
+        }, arguments); },
         __wbg_document_3540635616a18455: function(arg0) {
             const ret = arg0.document;
             return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
@@ -124,12 +203,18 @@ function __wbg_get_imports() {
             const ret = Math.random();
             return ret;
         },
+        __wbg_removeAttribute_69b4f669d167f410: function() { return handleError(function (arg0, arg1, arg2) {
+            arg0.removeAttribute(getStringFromWasm0(arg1, arg2));
+        }, arguments); },
         __wbg_restore_6a7dd2b862e161a3: function(arg0) {
             arg0.restore();
         },
         __wbg_save_14924e966ab6b8b7: function(arg0) {
             arg0.save();
         },
+        __wbg_setAttribute_2e611c7b4151e535: function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
+            arg0.setAttribute(getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4));
+        }, arguments); },
         __wbg_set_fillStyle_ac68c79af375566e: function(arg0, arg1, arg2) {
             arg0.fillStyle = getStringFromWasm0(arg1, arg2);
         },
@@ -142,6 +227,12 @@ function __wbg_get_imports() {
         __wbg_set_height_bdd58e6b04e88cca: function(arg0, arg1) {
             arg0.height = arg1 >>> 0;
         },
+        __wbg_set_id_5d98cf28c584cc85: function(arg0, arg1, arg2) {
+            arg0.id = getStringFromWasm0(arg1, arg2);
+        },
+        __wbg_set_innerHTML_c3fb7c39d5f5f244: function(arg0, arg1, arg2) {
+            arg0.innerHTML = getStringFromWasm0(arg1, arg2);
+        },
         __wbg_set_lineWidth_e101692cb4fcf2b8: function(arg0, arg1) {
             arg0.lineWidth = arg1;
         },
@@ -153,6 +244,9 @@ function __wbg_get_imports() {
         },
         __wbg_set_strokeStyle_c6ed1f71bc678b73: function(arg0, arg1, arg2) {
             arg0.strokeStyle = getStringFromWasm0(arg1, arg2);
+        },
+        __wbg_set_textContent_9c5d65d703443b6d: function(arg0, arg1, arg2) {
+            arg0.textContent = arg1 === 0 ? undefined : getStringFromWasm0(arg1, arg2);
         },
         __wbg_set_width_25112eb6bf1148df: function(arg0, arg1) {
             arg0.width = arg1 >>> 0;
