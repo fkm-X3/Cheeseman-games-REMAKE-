@@ -7,6 +7,63 @@ export function game_loop() {
     }
 }
 
+/**
+ * @returns {string}
+ */
+export function get_achievements_html() {
+    let deferred1_0;
+    let deferred1_1;
+    try {
+        const ret = wasm.get_achievements_html();
+        deferred1_0 = ret[0];
+        deferred1_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
+    } finally {
+        wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+    }
+}
+
+/**
+ * @param {number} cube_id
+ * @returns {string}
+ */
+export function get_cube_details_html(cube_id) {
+    let deferred1_0;
+    let deferred1_1;
+    try {
+        const ret = wasm.get_cube_details_html(cube_id);
+        deferred1_0 = ret[0];
+        deferred1_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
+    } finally {
+        wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+    }
+}
+
+/**
+ * @returns {string}
+ */
+export function get_cubes_grid_html() {
+    let deferred1_0;
+    let deferred1_1;
+    try {
+        const ret = wasm.get_cubes_grid_html();
+        deferred1_0 = ret[0];
+        deferred1_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
+    } finally {
+        wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+    }
+}
+
+/**
+ * @returns {number}
+ */
+export function get_selected_cube_id() {
+    const ret = wasm.get_selected_cube_id();
+    return ret >>> 0;
+}
+
 export function go_to_menu() {
     const ret = wasm.go_to_menu();
     if (ret[1]) {
@@ -64,6 +121,13 @@ export function init_menu() {
     }
 }
 
+export function init_progress() {
+    const ret = wasm.init_progress();
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
 export function main() {
     wasm.main();
 }
@@ -95,6 +159,13 @@ export function prepare_game(mode, _from_screen) {
     }
 }
 
+export function reset_all_progress() {
+    const ret = wasm.reset_all_progress();
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
 export function restart_game() {
     const ret = wasm.restart_game();
     if (ret[1]) {
@@ -107,6 +178,16 @@ export function restart_game() {
  */
 export function select_cube(id) {
     const ret = wasm.select_cube(id);
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
+/**
+ * @param {number} id
+ */
+export function set_selected_cube(id) {
+    const ret = wasm.set_selected_cube(id);
     if (ret[1]) {
         throw takeFromExternrefTable0(ret[0]);
     }
@@ -179,6 +260,13 @@ function __wbg_get_imports() {
             const ret = arg0.getElementById(getStringFromWasm0(arg1, arg2));
             return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
         },
+        __wbg_getItem_88cc26174f98c20c: function() { return handleError(function (arg0, arg1, arg2, arg3) {
+            const ret = arg1.getItem(getStringFromWasm0(arg2, arg3));
+            var ptr1 = isLikeNone(ret) ? 0 : passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            var len1 = WASM_VECTOR_LEN;
+            getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
+            getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
+        }, arguments); },
         __wbg_instanceof_CanvasRenderingContext2d_d4be74cff7165c1e: function(arg0) {
             let result;
             try {
@@ -212,6 +300,10 @@ function __wbg_get_imports() {
         __wbg_lineTo_72d6b123d28ab168: function(arg0, arg1, arg2) {
             arg0.lineTo(arg1, arg2);
         },
+        __wbg_localStorage_e3f4a792bb36c514: function() { return handleError(function (arg0) {
+            const ret = arg0.localStorage;
+            return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
+        }, arguments); },
         __wbg_moveTo_11bf5a977e6b8610: function(arg0, arg1, arg2) {
             arg0.moveTo(arg1, arg2);
         },
@@ -234,6 +326,9 @@ function __wbg_get_imports() {
         },
         __wbg_setAttribute_2e611c7b4151e535: function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
             arg0.setAttribute(getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4));
+        }, arguments); },
+        __wbg_setItem_caab843cd6845dbb: function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
+            arg0.setItem(getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4));
         }, arguments); },
         __wbg_set_fillStyle_ac68c79af375566e: function(arg0, arg1, arg2) {
             arg0.fillStyle = getStringFromWasm0(arg1, arg2);
@@ -324,6 +419,14 @@ function addToExternrefTable0(obj) {
     const idx = wasm.__externref_table_alloc();
     wasm.__wbindgen_externrefs.set(idx, obj);
     return idx;
+}
+
+let cachedDataViewMemory0 = null;
+function getDataViewMemory0() {
+    if (cachedDataViewMemory0 === null || cachedDataViewMemory0.buffer.detached === true || (cachedDataViewMemory0.buffer.detached === undefined && cachedDataViewMemory0.buffer !== wasm.memory.buffer)) {
+        cachedDataViewMemory0 = new DataView(wasm.memory.buffer);
+    }
+    return cachedDataViewMemory0;
 }
 
 function getStringFromWasm0(ptr, len) {
@@ -428,6 +531,7 @@ function __wbg_finalize_init(instance, module) {
     wasmInstance = instance;
     wasm = instance.exports;
     wasmModule = module;
+    cachedDataViewMemory0 = null;
     cachedUint8ArrayMemory0 = null;
     wasm.__wbindgen_start();
     return wasm;

@@ -305,12 +305,13 @@
     </div>
 
     <script type="module">
-        import init, { init_game, init_menu, game_loop, handle_key_down, handle_key_up, restart_game, nav_to, prepare_game, show_game_over, go_to_menu } from './cube_combat_wasm.js';
+        import init, { init_game, init_menu, game_loop, handle_key_down, handle_key_up, restart_game, nav_to, prepare_game, show_game_over, go_to_menu, init_progress, set_selected_cube, get_selected_cube_id, get_cubes_grid_html, get_cube_details_html, get_achievements_html, reset_all_progress } from './cube_combat_wasm.js';
 
         async function start() {
             await init();
             init_game('game-canvas');
             init_menu();
+            init_progress();
 
             document.addEventListener('keydown', (e) => {
                 if (['Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyR', 'Escape'].includes(e.code)) {
@@ -325,20 +326,6 @@
 
             document.getElementById('btn-start-game')?.addEventListener('click', () => {
                 nav_to('screen-modes');
-            });
-
-            document.getElementById('btn-collected-cubes')?.addEventListener('click', () => {
-                nav_to('screen-cubes');
-            });
-
-            document.getElementById('btn-achievements')?.addEventListener('click', () => {
-                nav_to('screen-achievements');
-            });
-
-            document.getElementById('btn-reset-progress')?.addEventListener('click', () => {
-                if (confirm('Are you sure you want to reset all progress?')) {
-                    localStorage.clear();
-                }
             });
 
             document.getElementById('btn-quit')?.addEventListener('click', () => {
@@ -398,28 +385,79 @@
                 nav_to('screen-pvp-submenu');
             });
 
-            document.getElementById('btn-back-cubes')?.addEventListener('click', () => {
-                nav_to('screen-main');
-            });
-
-            document.getElementById('btn-sandbox')?.addEventListener('click', () => {
-                prepare_game('sandbox', 'screen-cubes');
-            });
-
-            document.getElementById('btn-fight')?.addEventListener('click', () => {
-                prepare_game('ai', 'screen-cubes');
-            });
-
-            document.getElementById('btn-back-achievements')?.addEventListener('click', () => {
-                nav_to('screen-main');
-            });
-
             document.getElementById('btn-restart')?.addEventListener('click', () => {
                 restart_game();
             });
 
             document.getElementById('btn-main-menu')?.addEventListener('click', () => {
                 go_to_menu();
+            });
+
+            function refreshCubesGrid() {
+                const container = document.getElementById('cubes-grid-container');
+                if (container) {
+                    container.innerHTML = get_cubes_grid_html();
+                }
+                const selectedId = get_selected_cube_id();
+                const panel = document.getElementById('cube-details-panel');
+                if (panel) {
+                    panel.innerHTML = get_cube_details_html(selectedId);
+                }
+                const fightBtn = document.getElementById('btn-fight');
+                if (fightBtn) {
+                    fightBtn.style.display = 'block';
+                }
+            }
+
+            document.getElementById('btn-collected-cubes')?.addEventListener('click', () => {
+                nav_to('screen-cubes');
+                refreshCubesGrid();
+            });
+
+            document.getElementById('btn-back-cubes')?.addEventListener('click', () => {
+                nav_to('screen-main');
+            });
+
+            document.getElementById('cubes-grid-container')?.addEventListener('click', (e) => {
+                const icon = e.target.closest('.cube-icon');
+                if (icon && !icon.classList.contains('locked')) {
+                    const id = parseInt(icon.dataset.cubeId);
+                    if (id) {
+                        set_selected_cube(id);
+                        refreshCubesGrid();
+                    }
+                }
+            });
+
+            function refreshAchievements() {
+                const container = document.getElementById('achievements-container');
+                if (container) {
+                    container.innerHTML = get_achievements_html();
+                }
+            }
+
+            document.getElementById('btn-achievements')?.addEventListener('click', () => {
+                nav_to('screen-achievements');
+                refreshAchievements();
+            });
+
+            document.getElementById('btn-back-achievements')?.addEventListener('click', () => {
+                nav_to('screen-main');
+            });
+
+            document.getElementById('btn-reset-progress')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to reset all progress?')) {
+                    reset_all_progress();
+                    nav_to('screen-main');
+                }
+            });
+
+            document.getElementById('btn-fight')?.addEventListener('click', () => {
+                prepare_game('ai', 'screen-cubes');
+            });
+
+            document.getElementById('btn-sandbox')?.addEventListener('click', () => {
+                prepare_game('sandbox', 'screen-cubes');
             });
 
             function loop() {
