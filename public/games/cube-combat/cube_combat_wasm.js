@@ -103,6 +103,16 @@ export function restart_game() {
 }
 
 /**
+ * @param {number} id
+ */
+export function select_cube(id) {
+    const ret = wasm.select_cube(id);
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
+/**
  * @param {string} winner
  */
 export function show_game_over(winner) {
@@ -199,6 +209,16 @@ function __wbg_get_imports() {
             const ret = result;
             return ret;
         },
+        __wbg_lineTo_72d6b123d28ab168: function(arg0, arg1, arg2) {
+            arg0.lineTo(arg1, arg2);
+        },
+        __wbg_moveTo_11bf5a977e6b8610: function(arg0, arg1, arg2) {
+            arg0.moveTo(arg1, arg2);
+        },
+        __wbg_now_81363d44c96dd239: function() {
+            const ret = Date.now();
+            return ret;
+        },
         __wbg_random_a8dfe52b70cb65a5: function() {
             const ret = Math.random();
             return ret;
@@ -245,6 +265,9 @@ function __wbg_get_imports() {
         __wbg_set_strokeStyle_c6ed1f71bc678b73: function(arg0, arg1, arg2) {
             arg0.strokeStyle = getStringFromWasm0(arg1, arg2);
         },
+        __wbg_set_textAlign_71396dccac36c6a3: function(arg0, arg1, arg2) {
+            arg0.textAlign = getStringFromWasm0(arg1, arg2);
+        },
         __wbg_set_textContent_9c5d65d703443b6d: function(arg0, arg1, arg2) {
             arg0.textContent = arg1 === 0 ? undefined : getStringFromWasm0(arg1, arg2);
         },
@@ -269,6 +292,9 @@ function __wbg_get_imports() {
         },
         __wbg_strokeRect_3430a0df4158ba67: function(arg0, arg1, arg2, arg3, arg4) {
             arg0.strokeRect(arg1, arg2, arg3, arg4);
+        },
+        __wbg_stroke_82139a335b371e81: function(arg0) {
+            arg0.stroke();
         },
         __wbg_translate_60b6d2cb9b18fba1: function() { return handleError(function (arg0, arg1, arg2) {
             arg0.translate(arg1, arg2);

@@ -1,0 +1,79 @@
+/* tslint:disable */
+/* eslint-disable */
+
+export function game_loop(): void;
+
+export function go_to_menu(): void;
+
+export function handle_key_down(key: string): void;
+
+export function handle_key_up(key: string): void;
+
+export function hide_menu(): void;
+
+export function init_game(canvas_id: string): void;
+
+export function init_menu(): void;
+
+export function main(): void;
+
+export function nav_to(screen_id: string): void;
+
+export function prepare_game(mode: string, _from_screen: string): void;
+
+export function restart_game(): void;
+
+export function select_cube(id: number): void;
+
+export function show_game_over(winner: string): void;
+
+export function show_menu(): void;
+
+export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
+
+export interface InitOutput {
+    readonly memory: WebAssembly.Memory;
+    readonly game_loop: () => [number, number];
+    readonly go_to_menu: () => [number, number];
+    readonly handle_key_down: (a: number, b: number) => [number, number];
+    readonly handle_key_up: (a: number, b: number) => [number, number];
+    readonly hide_menu: () => [number, number];
+    readonly init_game: (a: number, b: number) => [number, number];
+    readonly init_menu: () => [number, number];
+    readonly main: () => void;
+    readonly nav_to: (a: number, b: number) => [number, number];
+    readonly prepare_game: (a: number, b: number, c: number, d: number) => [number, number];
+    readonly restart_game: () => [number, number];
+    readonly select_cube: (a: number) => [number, number];
+    readonly show_game_over: (a: number, b: number) => [number, number];
+    readonly show_menu: () => [number, number];
+    readonly __wbindgen_exn_store: (a: number) => void;
+    readonly __externref_table_alloc: () => number;
+    readonly __wbindgen_externrefs: WebAssembly.Table;
+    readonly __externref_table_dealloc: (a: number) => void;
+    readonly __wbindgen_malloc: (a: number, b: number) => number;
+    readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+    readonly __wbindgen_start: () => void;
+}
+
+export type SyncInitInput = BufferSource | WebAssembly.Module;
+
+/**
+ * Instantiates the given `module`, which can either be bytes or
+ * a precompiled `WebAssembly.Module`.
+ *
+ * @param {{ module: SyncInitInput }} module - Passing `SyncInitInput` directly is deprecated.
+ *
+ * @returns {InitOutput}
+ */
+export function initSync(module: { module: SyncInitInput } | SyncInitInput): InitOutput;
+
+/**
+ * If `module_or_path` is {RequestInfo} or {URL}, makes a request and
+ * for everything else, calls `WebAssembly.instantiate` directly.
+ *
+ * @param {{ module_or_path: InitInput | Promise<InitInput> }} module_or_path - Passing `InitInput` directly is deprecated.
+ *
+ * @returns {Promise<InitOutput>}
+ */
+export default function __wbg_init (module_or_path?: { module_or_path: InitInput | Promise<InitInput> } | InitInput | Promise<InitInput>): Promise<InitOutput>;

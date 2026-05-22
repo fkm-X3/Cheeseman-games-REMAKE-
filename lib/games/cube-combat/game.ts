@@ -63,6 +63,36 @@ const CUBE_DATA = [
         attack2: "Passive: Jumps get higher each time.",
         counter: "Do not get hit by Silence. Watch out for his super high jumps - he can attack from above.",
         dev: true
+    },
+    {
+        id: 11, name: "Ghost Cube", color: "rgba(200,200,200,0.5)", hp: 80, attacks: "Phase Slash, Teleport",
+        attack1: "[SPACE] Phase Slash: Brief invincibility on hit. 20 dmg.",
+        attack2: "[F] Teleport: Blink behind enemy. 15 dmg + disorient.",
+        counter: "He has low HP (80). Punish after teleport - he's vulnerable for 0.5 sec."
+    },
+    {
+        id: 12, name: "Tank Cube", color: "#556B2F", hp: 200, attacks: "Heavy Slam, Armor",
+        attack1: "[SPACE] Heavy Slam: AOE ground pound. 30 dmg + knockback.",
+        attack2: "[F] Armor: Reduces incoming damage by 50% for 3 sec.",
+        counter: "Slow movement. Kite him and wait for Armor to expire. Don't stand in slam AOE."
+    },
+    {
+        id: 13, name: "Trickster Cube", color: "#FF69B4", hp: 90, attacks: "Decoy, Swap",
+        attack1: "[SPACE] Decoy: Leaves a clone that explodes on contact. 15 dmg.",
+        attack2: "[F] Swap: Teleports to enemy position, swapping places. 10 dmg + confusion.",
+        counter: "Watch for the decoy - it looks identical. If swapped, your controls are inverted briefly."
+    },
+    {
+        id: 14, name: "Pyro Cube", color: "#FF4500", hp: 100, attacks: "Flame Dash, Fire Wall",
+        attack1: "[SPACE] Flame Dash: Burning charge that leaves fire trail. 20 dmg + burn DoT.",
+        attack2: "[F] Fire Wall: Creates a wall of fire that blocks and burns. 10 dmg/sec.",
+        counter: "The fire trail stays on the ground - avoid it. Fire Wall lasts 4 sec, go around it."
+    },
+    {
+        id: 15, name: "Frost Cube", color: "#B0E0E6", hp: 110, attacks: "Ice Shard, Freeze",
+        attack1: "[SPACE] Ice Shard: Ranged projectile. 18 dmg + slow.",
+        attack2: "[F] Freeze: Short range freeze that immobilizes enemy for 1.5 sec.",
+        counter: "If frozen, you can't move - break free by mashing space. Ice shards are dodgeable."
     }
 ];
 
@@ -75,7 +105,12 @@ let ACHIEVEMENT_DATA = [
     { id: 4, name: "Wombo Combo", desc: "Counter an attack then hit every shot to win", unlocks: "Ima Touch You", unlocked: false },
     { id: 5, name: "In every timeline I kill you...", desc: "Lose to Fbt_7  ", unlocks: "Vigilante", unlocked: false },
     { id: 6, name: "Not like this", desc: "Fbt_7 vs Bobbythe124", unlocks: "The heartbreaking (placeholder)", unlocked: false },
-    { id: 7, name: "Cube Master", desc: "Unlock all other cubes", unlocks: "Master Cube", unlocked: false }
+    { id: 7, name: "Cube Master", desc: "Unlock all other cubes", unlocks: "Master Cube", unlocked: false },
+    { id: 8, name: "Phantom Menace", desc: "Win 5 battles as Ghost Cube", unlocks: "Tank Cube", unlocked: false, progress: 0, maxProgress: 5 },
+    { id: 9, name: "Unbreakable", desc: "Win a battle with Tank Cube at full HP", unlocks: "Trickster Cube", unlocked: false },
+    { id: 10, name: "Now You See Me", desc: "Kill an enemy with a decoy explosion", unlocks: "Pyro Cube", unlocked: false },
+    { id: 11, name: "Burn Baby Burn", desc: "Deal 100 burn damage total", unlocks: "Frost Cube", unlocked: false, progress: 0, maxProgress: 100 },
+    { id: 12, name: "Absolute Zero", desc: "Freeze an enemy 10 times in one match", unlocks: "New Game+", unlocked: false, progress: 0, maxProgress: 10 }
 ];
 
 
@@ -2769,6 +2804,981 @@ class Bobbythe124Cube extends BlueCube {
 }
 
 
+class GhostCube extends BlueCube {
+    constructor() {
+        super();
+        this.color = "rgba(200,200,200,0.5)";
+        this.baseColor = "rgba(200,200,200,0.5)";
+        this.maxHp = 80;
+        this.hp = 80;
+        this.teleportCooldown = 0;
+        this.teleportActive = false;
+        this.teleportTimer = 0;
+        this.phaseActive = false;
+        this.phaseTimer = 0;
+    }
+
+    update() {
+        if (this.dead) return;
+        if (isRetroMode) {
+            super.update();
+            return;
+        }
+        if (IS_TESTER) {
+            this.slashCooldown = 0;
+            this.teleportCooldown = 0;
+        }
+        if (this.slashCooldown > 0) this.slashCooldown--;
+        if (this.teleportCooldown > 0) this.teleportCooldown--;
+
+        if (this.teleportActive) {
+            this.teleportTimer--;
+            if (this.teleportTimer <= 0) {
+                this.teleportActive = false;
+            }
+            return;
+        }
+
+        if (this.phaseActive) {
+            this.phaseTimer--;
+            if (this.phaseTimer <= 0) {
+                this.phaseActive = false;
+                this.color = this.baseColor;
+            }
+        }
+
+        if (this.parryActive) {
+            this.parryTimer--;
+            this.vx = 0;
+            if (this.parryTimer <= 0) {
+                this.parryActive = false;
+                this.color = this.baseColor;
+                this.parryCooldown = 60;
+            }
+            return;
+        }
+
+        if (this.slashActive) {
+            this.slashTimer--;
+            if (this.slashTimer <= 0) this.slashActive = false;
+        }
+
+        if (this.invertControlsTimer > 0) this.invertControlsTimer--;
+
+        let inputLeft = keys['KeyA'];
+        let inputRight = keys['KeyD'];
+        let inputUp = keys['KeyW'];
+
+        if (this.invertControlsTimer > 0) {
+            const temp = inputLeft;
+            inputLeft = inputRight;
+            inputRight = temp;
+        }
+
+        if (inputLeft) {
+            this.vx = -MOVE_SPEED;
+            this.facingRight = false;
+        }
+        if (inputRight) {
+            this.vx = MOVE_SPEED;
+            this.facingRight = true;
+        }
+        if (inputUp && this.isGrounded) {
+            this.vy = -JUMP_FORCE;
+        }
+
+        if (keys['Space'] && this.slashCooldown <= 0) {
+            this.performSlash();
+        }
+
+        if (keys['KeyF'] && this.teleportCooldown <= 0 && !this.teleportActive) {
+            this.performTeleport();
+        }
+
+        this.vy += GRAVITY;
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.y + this.h >= FLOOR_Y) {
+            this.y = FLOOR_Y - this.h;
+            this.vy = 0;
+            this.isGrounded = true;
+        } else {
+            this.isGrounded = false;
+        }
+
+        if (this.x < 0) this.x = 0;
+        if (this.x + this.w > WIDTH) this.x = WIDTH - this.w;
+
+        this.vx *= FRICTION;
+        if (Math.abs(this.vx) < 0.1) this.vx = 0;
+    }
+
+    performTeleport() {
+        this.teleportActive = true;
+        this.teleportTimer = 15;
+        this.teleportCooldown = 90;
+
+        const target = this.target || redCube;
+        const oldX = this.x;
+        const oldY = this.y;
+
+        this.x = target.x + (this.facingRight ? -this.w - 10 : target.w + 10);
+        this.y = target.y;
+
+        if (this.x < 0) this.x = 10;
+        if (this.x + this.w > WIDTH) this.x = WIDTH - this.w - 10;
+
+        spawnParticles(oldX + this.w / 2, oldY + this.h / 2, "rgba(200,200,200,0.5)", 10, 'spark');
+        spawnParticles(this.x + this.w / 2, this.y + this.h / 2, "rgba(200,200,200,0.5)", 10, 'spark');
+
+        if (rectIntersect(this.x, this.y, this.w, this.h, target.x, target.y, target.w, target.h)) {
+            if (!target.isInvincible) {
+                target.takeDamage(15 * this.damageMult);
+                target.vx = this.facingRight ? 10 : -10;
+                target.vy = -5;
+            }
+        }
+    }
+
+    takeDamage(amount) {
+        if (this.phaseActive) return;
+        super.takeDamage(amount);
+    }
+
+    performSlash() {
+        this.slashActive = true;
+        this.slashTimer = 15;
+        this.slashCooldown = 60;
+        this.phaseActive = true;
+        this.phaseTimer = 10;
+        this.color = "rgba(255,255,255,0.8)";
+
+        const reach = 70;
+        const hitX = this.facingRight ? this.x + this.w : this.x - reach;
+
+        spawnParticles(hitX + reach / 2, this.y + this.h / 2, "white", 5, 'spark');
+
+        if (!(this.target || redCube).dead && rectIntersect(hitX, this.y, reach, this.h, (this.target || redCube).x, (this.target || redCube).y, (this.target || redCube).w, (this.target || redCube).h)) {
+            if (!(this.target || redCube).isInvincible) {
+                (this.target || redCube).takeDamage(20 * this.damageMult);
+                (this.target || redCube).vx = this.facingRight ? 10 : -10;
+                (this.target || redCube).vy = -5;
+            }
+        }
+    }
+
+    draw(ctx) {
+        if (this.dead) return;
+
+        ctx.globalAlpha = this.phaseActive ? 0.8 : 0.5;
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.w, this.h);
+
+        ctx.strokeStyle = "rgba(255,255,255,0.3)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(this.x, this.y, this.w, this.h);
+
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+        const eyeX = this.facingRight ? this.x + 30 : this.x + 10;
+        ctx.fillRect(eyeX, this.y + 10, 10, 10);
+
+        ctx.globalAlpha = 1.0;
+
+        if (this.slashActive) {
+            ctx.fillStyle = "rgba(200,200,200,0.4)";
+            const reach = 70;
+            const hitX = this.facingRight ? this.x + this.w : this.x - reach;
+            ctx.fillRect(hitX, this.y, reach, this.h);
+        }
+
+        if (this.teleportActive) {
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(this.x + this.w / 2, this.y + this.h / 2, 35, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+    }
+}
+
+
+class TankCube extends BlueCube {
+    constructor() {
+        super();
+        this.color = "#556B2F";
+        this.baseColor = "#556B2F";
+        this.maxHp = 200;
+        this.hp = 200;
+        this.armorActive = false;
+        this.armorTimer = 0;
+        this.armorCooldown = 0;
+        this.slamActive = false;
+        this.slamTimer = 0;
+        this.slamCooldown = 0;
+    }
+
+    update() {
+        if (this.dead) return;
+        if (isRetroMode) {
+            super.update();
+            return;
+        }
+        if (IS_TESTER) {
+            this.slamCooldown = 0;
+            this.armorCooldown = 0;
+        }
+        if (this.slamCooldown > 0) this.slamCooldown--;
+        if (this.armorCooldown > 0) this.armorCooldown--;
+
+        if (this.armorActive) {
+            this.armorTimer--;
+            if (this.armorTimer <= 0) {
+                this.armorActive = false;
+                this.armorCooldown = 180;
+                this.color = this.baseColor;
+            }
+        }
+
+        if (this.slamActive) {
+            this.slamTimer--;
+            if (this.slamTimer <= 0) {
+                this.slamActive = false;
+            }
+        }
+
+        if (this.parryActive) {
+            this.parryTimer--;
+            this.vx = 0;
+            if (this.parryTimer <= 0) {
+                this.parryActive = false;
+                this.color = this.baseColor;
+                this.parryCooldown = 60;
+            }
+            return;
+        }
+
+        if (this.slashActive) {
+            this.slashTimer--;
+            if (this.slashTimer <= 0) this.slashActive = false;
+        }
+
+        if (this.invertControlsTimer > 0) this.invertControlsTimer--;
+
+        let inputLeft = keys['KeyA'];
+        let inputRight = keys['KeyD'];
+        let inputUp = keys['KeyW'];
+
+        if (this.invertControlsTimer > 0) {
+            const temp = inputLeft;
+            inputLeft = inputRight;
+            inputRight = temp;
+        }
+
+        const moveSpeed = this.armorActive ? MOVE_SPEED * 0.5 : MOVE_SPEED * 0.7;
+
+        if (inputLeft) {
+            this.vx = -moveSpeed;
+            this.facingRight = false;
+        }
+        if (inputRight) {
+            this.vx = moveSpeed;
+            this.facingRight = true;
+        }
+        if (inputUp && this.isGrounded) {
+            this.vy = -JUMP_FORCE * 0.8;
+        }
+
+        if (keys['Space'] && this.slamCooldown <= 0) {
+            this.performSlam();
+        }
+
+        if (keys['KeyF'] && !this.armorActive && this.armorCooldown <= 0) {
+            this.armorActive = true;
+            this.armorTimer = 180;
+            this.color = "#7A8B4F";
+        }
+
+        this.vy += GRAVITY;
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.y + this.h >= FLOOR_Y) {
+            this.y = FLOOR_Y - this.h;
+            this.vy = 0;
+            this.isGrounded = true;
+        } else {
+            this.isGrounded = false;
+        }
+
+        if (this.x < 0) this.x = 0;
+        if (this.x + this.w > WIDTH) this.x = WIDTH - this.w;
+
+        this.vx *= FRICTION;
+        if (Math.abs(this.vx) < 0.1) this.vx = 0;
+    }
+
+    performSlam() {
+        this.slamActive = true;
+        this.slamTimer = 20;
+        this.slamCooldown = 90;
+
+        const aoeRange = 120;
+        const aoeX = this.x + this.w / 2 - aoeRange;
+        const aoeY = this.y + this.h - 20;
+
+        triggerShake(10);
+        spawnParticles(this.x + this.w / 2, this.y + this.h, "#556B2F", 20, 'square');
+
+        const target = this.target || redCube;
+        if (!target.dead && rectIntersect(aoeX, aoeY, aoeRange * 2, 40, target.x, target.y, target.w, target.h)) {
+            if (!target.isInvincible) {
+                target.takeDamage(30 * this.damageMult);
+                target.vx = this.facingRight ? 15 : -15;
+                target.vy = -10;
+            }
+        }
+    }
+
+    takeDamage(amount) {
+        if (this.armorActive) {
+            amount = Math.floor(amount * 0.5);
+        }
+        super.takeDamage(amount);
+    }
+
+    draw(ctx) {
+        if (this.dead) return;
+
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.w, this.h);
+
+        ctx.strokeStyle = this.armorActive ? "#FFD700" : "black";
+        ctx.lineWidth = this.armorActive ? 4 : 2;
+        ctx.strokeRect(this.x, this.y, this.w, this.h);
+
+        ctx.fillStyle = "white";
+        const eyeX = this.facingRight ? this.x + 30 : this.x + 10;
+        ctx.fillRect(eyeX, this.y + 10, 10, 10);
+
+        if (this.slamActive) {
+            const aoeRange = 120;
+            const aoeX = this.x + this.w / 2 - aoeRange;
+            ctx.fillStyle = "rgba(85, 107, 47, 0.4)";
+            ctx.fillRect(aoeX, this.y + this.h - 20, aoeRange * 2, 40);
+
+            ctx.strokeStyle = "rgba(85, 107, 47, 0.6)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(this.x + this.w / 2, this.y + this.h, aoeRange, Math.PI, 0);
+            ctx.stroke();
+        }
+
+        if (this.armorActive) {
+            ctx.strokeStyle = "rgba(255, 215, 0, 0.5)";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(this.x + this.w / 2, this.y + this.h / 2, 40, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+    }
+}
+
+
+class TricksterCube extends BlueCube {
+    constructor() {
+        super();
+        this.color = "#FF69B4";
+        this.baseColor = "#FF69B4";
+        this.maxHp = 90;
+        this.hp = 90;
+        this.decoyActive = false;
+        this.decoyTimer = 0;
+        this.decoyCooldown = 0;
+        this.decoyX = 0;
+        this.decoyY = 0;
+        this.swapActive = false;
+        this.swapTimer = 0;
+        this.swapCooldown = 0;
+    }
+
+    update() {
+        if (this.dead) return;
+        if (isRetroMode) {
+            super.update();
+            return;
+        }
+        if (IS_TESTER) {
+            this.slashCooldown = 0;
+            this.decoyCooldown = 0;
+            this.swapCooldown = 0;
+        }
+        if (this.slashCooldown > 0) this.slashCooldown--;
+        if (this.decoyCooldown > 0) this.decoyCooldown--;
+        if (this.swapCooldown > 0) this.swapCooldown--;
+
+        if (this.decoyActive) {
+            this.decoyTimer--;
+            if (this.decoyTimer <= 0) {
+                this.decoyActive = false;
+            }
+
+            const target = this.target || redCube;
+            const dx = target.x - this.decoyX;
+            const dy = target.y - this.decoyY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 50) {
+                if (!target.isInvincible) {
+                    target.takeDamage(15 * this.damageMult);
+                    target.vx = (dx > 0 ? -1 : 1) * 10;
+                    target.vy = -5;
+                    spawnParticles(this.decoyX + this.w / 2, this.decoyY + this.h / 2, "#FF69B4", 15, 'spark');
+                }
+                this.decoyActive = false;
+            } else {
+                this.decoyX += dx * 0.02;
+                this.decoyY += dy * 0.02;
+            }
+        }
+
+        if (this.swapActive) {
+            this.swapTimer--;
+            if (this.swapTimer <= 0) {
+                this.swapActive = false;
+            }
+        }
+
+        if (this.parryActive) {
+            this.parryTimer--;
+            this.vx = 0;
+            if (this.parryTimer <= 0) {
+                this.parryActive = false;
+                this.color = this.baseColor;
+                this.parryCooldown = 60;
+            }
+            return;
+        }
+
+        if (this.slashActive) {
+            this.slashTimer--;
+            if (this.slashTimer <= 0) this.slashActive = false;
+        }
+
+        if (this.invertControlsTimer > 0) this.invertControlsTimer--;
+
+        let inputLeft = keys['KeyA'];
+        let inputRight = keys['KeyD'];
+        let inputUp = keys['KeyW'];
+
+        if (this.invertControlsTimer > 0) {
+            const temp = inputLeft;
+            inputLeft = inputRight;
+            inputRight = temp;
+        }
+
+        if (inputLeft) {
+            this.vx = -MOVE_SPEED;
+            this.facingRight = false;
+        }
+        if (inputRight) {
+            this.vx = MOVE_SPEED;
+            this.facingRight = true;
+        }
+        if (inputUp && this.isGrounded) {
+            this.vy = -JUMP_FORCE;
+        }
+
+        if (keys['Space'] && this.slashCooldown <= 0) {
+            this.performDecoySlash();
+        }
+
+        if (keys['KeyF'] && this.swapCooldown <= 0 && !this.swapActive) {
+            this.performSwap();
+        }
+
+        this.vy += GRAVITY;
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.y + this.h >= FLOOR_Y) {
+            this.y = FLOOR_Y - this.h;
+            this.vy = 0;
+            this.isGrounded = true;
+        } else {
+            this.isGrounded = false;
+        }
+
+        if (this.x < 0) this.x = 0;
+        if (this.x + this.w > WIDTH) this.x = WIDTH - this.w;
+
+        this.vx *= FRICTION;
+        if (Math.abs(this.vx) < 0.1) this.vx = 0;
+    }
+
+    performDecoySlash() {
+        this.slashActive = true;
+        this.slashTimer = 15;
+        this.slashCooldown = 60;
+        this.decoyActive = true;
+        this.decoyTimer = 180;
+        this.decoyX = this.x;
+        this.decoyY = this.y;
+
+        spawnParticles(this.x + this.w / 2, this.y + this.h / 2, "#FF69B4", 8, 'spark');
+    }
+
+    performSwap() {
+        this.swapActive = true;
+        this.swapTimer = 30;
+        this.swapCooldown = 120;
+
+        const target = this.target || redCube;
+        const oldX = this.x;
+        const oldY = this.y;
+
+        this.x = target.x;
+        this.y = target.y;
+        target.x = oldX;
+        target.y = oldY;
+
+        target.invertControlsTimer = 60;
+
+        spawnParticles(oldX + this.w / 2, oldY + this.h / 2, "#FF69B4", 10, 'spark');
+        spawnParticles(this.x + this.w / 2, this.y + this.h / 2, "#FF69B4", 10, 'spark');
+
+        if (!target.isInvincible) {
+            target.takeDamage(10 * this.damageMult);
+        }
+    }
+
+    draw(ctx) {
+        if (this.dead) return;
+
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.w, this.h);
+
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(this.x, this.y, this.w, this.h);
+
+        ctx.fillStyle = "white";
+        const eyeX = this.facingRight ? this.x + 30 : this.x + 10;
+        ctx.fillRect(eyeX, this.y + 10, 10, 10);
+
+        if (this.decoyActive) {
+            ctx.globalAlpha = 0.7;
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.decoyX, this.decoyY, this.w, this.h);
+            ctx.strokeStyle = "rgba(255,255,255,0.5)";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(this.decoyX, this.decoyY, this.w, this.h);
+            ctx.globalAlpha = 1.0;
+        }
+
+        if (this.swapActive) {
+            ctx.strokeStyle = "#FF69B4";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(this.x + this.w / 2, this.y + this.h / 2, 40, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+    }
+}
+
+
+class PyroCube extends BlueCube {
+    constructor() {
+        super();
+        this.color = "#FF4500";
+        this.baseColor = "#FF4500";
+        this.maxHp = 100;
+        this.hp = 100;
+        this.flameDashActive = false;
+        this.flameDashTimer = 0;
+        this.flameDashCooldown = 0;
+        this.fireWallActive = false;
+        this.fireWallTimer = 0;
+        this.fireWallCooldown = 0;
+        this.fireWallX = 0;
+        this.fireBurnTargets = [];
+    }
+
+    update() {
+        if (this.dead) return;
+        if (isRetroMode) {
+            super.update();
+            return;
+        }
+        if (IS_TESTER) {
+            this.slashCooldown = 0;
+            this.flameDashCooldown = 0;
+            this.fireWallCooldown = 0;
+        }
+        if (this.slashCooldown > 0) this.slashCooldown--;
+        if (this.flameDashCooldown > 0) this.flameDashCooldown--;
+        if (this.fireWallCooldown > 0) this.fireWallCooldown--;
+
+        if (this.flameDashActive) {
+            this.flameDashTimer--;
+            this.vx = this.facingRight ? 18 : -18;
+
+            if (Math.random() < 0.3) {
+                spawnParticles(this.x + this.w / 2, this.y + this.h, "#FF4500", 1, 'spark');
+            }
+
+            if (this.flameDashTimer <= 0) {
+                this.flameDashActive = false;
+            }
+
+            this.vy += GRAVITY;
+            this.x += this.vx;
+            this.y += this.vy;
+
+            if (this.y + this.h >= FLOOR_Y) {
+                this.y = FLOOR_Y - this.h;
+                this.vy = 0;
+                this.isGrounded = true;
+            }
+
+            if (this.x < 0) this.x = 0;
+            if (this.x + this.w > WIDTH) this.x = WIDTH - this.w;
+            return;
+        }
+
+        if (this.fireWallActive) {
+            this.fireWallTimer--;
+            const target = this.target || redCube;
+            if (!target.dead && rectIntersect(this.fireWallX, FLOOR_Y - 80, 20, 80, target.x, target.y, target.w, target.h)) {
+                if (!target.isInvincible && Math.random() < 0.1) {
+                    target.takeDamage(10);
+                    spawnParticles(target.x + target.w / 2, target.y + target.h / 2, "#FF4500", 3, 'spark');
+                }
+            }
+            if (this.fireWallTimer <= 0) {
+                this.fireWallActive = false;
+                this.fireWallCooldown = 240;
+            }
+        }
+
+        if (this.parryActive) {
+            this.parryTimer--;
+            this.vx = 0;
+            if (this.parryTimer <= 0) {
+                this.parryActive = false;
+                this.color = this.baseColor;
+                this.parryCooldown = 60;
+            }
+            return;
+        }
+
+        if (this.slashActive) {
+            this.slashTimer--;
+            if (this.slashTimer <= 0) this.slashActive = false;
+        }
+
+        if (this.invertControlsTimer > 0) this.invertControlsTimer--;
+
+        let inputLeft = keys['KeyA'];
+        let inputRight = keys['KeyD'];
+        let inputUp = keys['KeyW'];
+
+        if (this.invertControlsTimer > 0) {
+            const temp = inputLeft;
+            inputLeft = inputRight;
+            inputRight = temp;
+        }
+
+        if (inputLeft) {
+            this.vx = -MOVE_SPEED;
+            this.facingRight = false;
+        }
+        if (inputRight) {
+            this.vx = MOVE_SPEED;
+            this.facingRight = true;
+        }
+        if (inputUp && this.isGrounded) {
+            this.vy = -JUMP_FORCE;
+        }
+
+        if (keys['Space'] && this.flameDashCooldown <= 0 && !this.flameDashActive) {
+            this.flameDashActive = true;
+            this.flameDashTimer = 20;
+            this.flameDashCooldown = 90;
+            this.slashActive = true;
+            this.slashTimer = 20;
+        }
+
+        if (keys['KeyF'] && !this.fireWallActive && this.fireWallCooldown <= 0) {
+            this.fireWallActive = true;
+            this.fireWallTimer = 240;
+            this.fireWallX = this.x + (this.facingRight ? this.w + 30 : -50);
+        }
+
+        this.vy += GRAVITY;
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.y + this.h >= FLOOR_Y) {
+            this.y = FLOOR_Y - this.h;
+            this.vy = 0;
+            this.isGrounded = true;
+        } else {
+            this.isGrounded = false;
+        }
+
+        if (this.x < 0) this.x = 0;
+        if (this.x + this.w > WIDTH) this.x = WIDTH - this.w;
+
+        this.vx *= FRICTION;
+        if (Math.abs(this.vx) < 0.1) this.vx = 0;
+    }
+
+    performSlash() {
+        this.slashActive = true;
+        this.slashTimer = 15;
+        this.slashCooldown = 60;
+
+        const reach = 70;
+        const hitX = this.facingRight ? this.x + this.w : this.x - reach;
+
+        spawnParticles(hitX + reach / 2, this.y + this.h / 2, "#FF4500", 5, 'spark');
+
+        if (!(this.target || redCube).dead && rectIntersect(hitX, this.y, reach, this.h, (this.target || redCube).x, (this.target || redCube).y, (this.target || redCube).w, (this.target || redCube).h)) {
+            if (!(this.target || redCube).isInvincible) {
+                (this.target || redCube).takeDamage(20 * this.damageMult);
+                (this.target || redCube).vx = this.facingRight ? 10 : -10;
+                (this.target || redCube).vy = -5;
+            }
+        }
+    }
+
+    draw(ctx) {
+        if (this.dead) return;
+
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.w, this.h);
+
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(this.x, this.y, this.w, this.h);
+
+        if (this.flameDashActive) {
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#FF4500";
+            ctx.fillStyle = "rgba(255, 69, 0, 0.6)";
+            const offset = this.facingRight ? -30 : this.w;
+            ctx.fillRect(this.x + offset, this.y, this.w + 30, this.h);
+            ctx.shadowBlur = 0;
+        }
+
+        if (this.fireWallActive) {
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = "#FF4500";
+            ctx.fillStyle = "rgba(255, 69, 0, 0.7)";
+            ctx.fillRect(this.fireWallX, FLOOR_Y - 80, 20, 80);
+
+            ctx.fillStyle = "rgba(255, 200, 0, 0.5)";
+            ctx.fillRect(this.fireWallX + 3, FLOOR_Y - 70, 14, 70);
+
+            for (let i = 0; i < 3; i++) {
+                const flickerX = this.fireWallX + Math.random() * 20;
+                const flickerY = FLOOR_Y - 80 - Math.random() * 15;
+                ctx.fillStyle = "rgba(255, 100, 0, 0.8)";
+                ctx.beginPath();
+                ctx.arc(flickerX, flickerY, 5 + Math.random() * 5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.shadowBlur = 0;
+        }
+
+        ctx.fillStyle = "white";
+        const eyeX = this.facingRight ? this.x + 30 : this.x + 10;
+        ctx.fillRect(eyeX, this.y + 10, 10, 10);
+    }
+}
+
+
+class FrostCube extends BlueCube {
+    constructor() {
+        super();
+        this.color = "#B0E0E6";
+        this.baseColor = "#B0E0E6";
+        this.maxHp = 110;
+        this.hp = 110;
+        this.iceShardActive = false;
+        this.iceShardTimer = 0;
+        this.iceShardCooldown = 0;
+        this.iceShardX = 0;
+        this.iceShardY = 0;
+        this.iceShardVx = 0;
+        this.freezeActive = false;
+        this.freezeTimer = 0;
+        this.freezeCooldown = 0;
+    }
+
+    update() {
+        if (this.dead) return;
+        if (isRetroMode) {
+            super.update();
+            return;
+        }
+        if (IS_TESTER) {
+            this.slashCooldown = 0;
+            this.iceShardCooldown = 0;
+            this.freezeCooldown = 0;
+        }
+        if (this.slashCooldown > 0) this.slashCooldown--;
+        if (this.iceShardCooldown > 0) this.iceShardCooldown--;
+        if (this.freezeCooldown > 0) this.freezeCooldown--;
+
+        if (this.iceShardActive) {
+            this.iceShardTimer--;
+            this.iceShardX += this.iceShardVx;
+
+            const target = this.target || redCube;
+            if (!target.dead && rectIntersect(this.iceShardX, this.iceShardY, 15, 10, target.x, target.y, target.w, target.h)) {
+                if (!target.isInvincible) {
+                    target.takeDamage(18 * this.damageMult);
+                    target.vx *= 0.3;
+                    spawnParticles(this.iceShardX, this.iceShardY, "#B0E0E6", 8, 'spark');
+                }
+                this.iceShardActive = false;
+            }
+
+            if (this.iceShardTimer <= 0 || this.iceShardX < 0 || this.iceShardX > WIDTH) {
+                this.iceShardActive = false;
+            }
+        }
+
+        if (this.freezeActive) {
+            this.freezeTimer--;
+            const target = this.target || redCube;
+            if (!target.dead) {
+                target.vx = 0;
+            }
+            if (this.freezeTimer <= 0) {
+                this.freezeActive = false;
+                this.freezeCooldown = 180;
+            }
+        }
+
+        if (this.parryActive) {
+            this.parryTimer--;
+            this.vx = 0;
+            if (this.parryTimer <= 0) {
+                this.parryActive = false;
+                this.color = this.baseColor;
+                this.parryCooldown = 60;
+            }
+            return;
+        }
+
+        if (this.slashActive) {
+            this.slashTimer--;
+            if (this.slashTimer <= 0) this.slashActive = false;
+        }
+
+        if (this.invertControlsTimer > 0) this.invertControlsTimer--;
+
+        let inputLeft = keys['KeyA'];
+        let inputRight = keys['KeyD'];
+        let inputUp = keys['KeyW'];
+
+        if (this.invertControlsTimer > 0) {
+            const temp = inputLeft;
+            inputLeft = inputRight;
+            inputRight = temp;
+        }
+
+        if (inputLeft) {
+            this.vx = -MOVE_SPEED;
+            this.facingRight = false;
+        }
+        if (inputRight) {
+            this.vx = MOVE_SPEED;
+            this.facingRight = true;
+        }
+        if (inputUp && this.isGrounded) {
+            this.vy = -JUMP_FORCE;
+        }
+
+        if (keys['Space'] && this.iceShardCooldown <= 0 && !this.iceShardActive) {
+            this.iceShardActive = true;
+            this.iceShardTimer = 60;
+            this.iceShardCooldown = 45;
+            this.iceShardX = this.facingRight ? this.x + this.w : this.x - 15;
+            this.iceShardY = this.y + this.h / 2 - 5;
+            this.iceShardVx = this.facingRight ? 12 : -12;
+        }
+
+        if (keys['KeyF'] && this.freezeCooldown <= 0 && !this.freezeActive) {
+            this.freezeActive = true;
+            this.freezeTimer = 90;
+            this.freezeCooldown = 180;
+
+            const target = this.target || redCube;
+            const dist = Math.abs(this.x - target.x);
+            if (dist < 100) {
+                spawnParticles(target.x + target.w / 2, target.y + target.h / 2, "#B0E0E6", 15, 'spark');
+            }
+        }
+
+        this.vy += GRAVITY;
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.y + this.h >= FLOOR_Y) {
+            this.y = FLOOR_Y - this.h;
+            this.vy = 0;
+            this.isGrounded = true;
+        } else {
+            this.isGrounded = false;
+        }
+
+        if (this.x < 0) this.x = 0;
+        if (this.x + this.w > WIDTH) this.x = WIDTH - this.w;
+
+        this.vx *= FRICTION;
+        if (Math.abs(this.vx) < 0.1) this.vx = 0;
+    }
+
+    draw(ctx) {
+        if (this.dead) return;
+
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.w, this.h);
+
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(this.x, this.y, this.w, this.h);
+
+        if (this.iceShardActive) {
+            ctx.fillStyle = "#E0FFFF";
+            ctx.fillRect(this.iceShardX, this.iceShardY, 15, 10);
+            ctx.fillStyle = "white";
+            ctx.fillRect(this.iceShardX + 2, this.iceShardY + 2, 11, 6);
+        }
+
+        if (this.freezeActive) {
+            const target = this.target || redCube;
+            ctx.strokeStyle = "#B0E0E6";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(target.x + target.w / 2, target.y + target.h / 2, 40, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.fillStyle = "rgba(176, 224, 230, 0.3)";
+            ctx.fillRect(target.x - 5, target.y - 5, target.w + 10, target.h + 10);
+        }
+
+        ctx.fillStyle = "white";
+        const eyeX = this.facingRight ? this.x + 30 : this.x + 10;
+        ctx.fillRect(eyeX, this.y + 10, 10, 10);
+    }
+}
+
+
 class RedCube extends Entity {
     constructor() {
         super(WIDTH - 100, FLOOR_Y - CUBE_SIZE, COLORS.RED, 100);
@@ -3029,6 +4039,11 @@ function getClassForId(id) {
         case 8: return Fbt7Cube;
         case 9: return GoldCube;
         case 10: return Bobbythe124Cube;
+        case 11: return GhostCube;
+        case 12: return TankCube;
+        case 13: return TricksterCube;
+        case 14: return PyroCube;
+        case 15: return FrostCube;
         default: return BlueCube;
     }
 }
