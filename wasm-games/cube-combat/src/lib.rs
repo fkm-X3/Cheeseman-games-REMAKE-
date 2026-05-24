@@ -259,6 +259,23 @@ pub fn get_dev() -> bool {
 }
 
 #[wasm_bindgen]
+pub fn set_debug(enabled: bool) -> Result<(), JsValue> {
+    unsafe {
+        if let Some(ref mut game) = GAME {
+            game.input.set_debug(enabled);
+        }
+    }
+    Ok(())
+}
+
+#[wasm_bindgen]
+pub fn get_debug() -> bool {
+    unsafe {
+        GAME.as_ref().map(|g| g.input.is_debug).unwrap_or(false)
+    }
+}
+
+#[wasm_bindgen]
 pub fn go_to_menu() -> Result<(), JsValue> {
     unsafe {
         if let Some(ref mut game) = GAME {

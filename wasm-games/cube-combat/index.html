@@ -305,7 +305,7 @@
     </div>
 
     <script type="module">
-        import init, { init_game, init_menu, game_loop, handle_key_down, handle_key_up, restart_game, nav_to, prepare_game, show_game_over, go_to_menu, init_progress, set_selected_cube, get_selected_cube_id, get_cubes_grid_html, get_cube_details_html, get_achievements_html, reset_all_progress, set_tester, set_dev, get_tester, get_dev } from './pkg/cube_combat_wasm.js';
+        import init, { init_game, init_menu, game_loop, handle_key_down, handle_key_up, restart_game, nav_to, prepare_game, show_game_over, go_to_menu, init_progress, set_selected_cube, get_selected_cube_id, get_cubes_grid_html, get_cube_details_html, get_achievements_html, reset_all_progress, set_tester, set_dev, get_tester, get_dev, set_debug, get_debug } from './pkg/cube_combat_wasm.js';
 
         async function start() {
             await init();
@@ -335,12 +335,18 @@
                         localStorage.setItem('cc_dev', msg.value ? 'true' : 'false');
                         try { set_dev(!!msg.value); } catch (e) { console.error('[cube-combat iframe] set_dev failed:', e); }
                         break;
+                    case 'cube-combat:set-debug':
+                        console.log('[cube-combat iframe] set-debug:', !!msg.value);
+                        localStorage.setItem('cc_debugMode', msg.value ? 'true' : 'false');
+                        try { set_debug(!!msg.value); } catch (e) { console.error('[cube-combat iframe] set_debug failed:', e); }
+                        break;
                     case 'cube-combat:get-status':
                         console.log('[cube-combat iframe] get-status');
                         event.source?.postMessage({
                             type: 'cube-combat:status',
                             tester: get_tester(),
                             dev: get_dev(),
+                            debug: get_debug(),
                         }, { targetOrigin: '*' });
                         break;
                     default:

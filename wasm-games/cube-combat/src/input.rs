@@ -4,6 +4,7 @@ pub struct Input {
     keys: HashMap<String, bool>,
     pub is_tester: bool,
     pub is_dev: bool,
+    pub is_debug: bool,
 }
 
 impl Input {
@@ -12,6 +13,7 @@ impl Input {
             keys: HashMap::new(),
             is_tester: false,
             is_dev: false,
+            is_debug: false,
         }
     }
 
@@ -29,5 +31,9 @@ impl Input {
 
     pub fn set_dev(&mut self, enabled: bool) {
         self.is_dev = enabled;
+    }
+
+    pub fn set_debug(&mut self, enabled: bool) {
+        self.is_debug = enabled;
     }
 }

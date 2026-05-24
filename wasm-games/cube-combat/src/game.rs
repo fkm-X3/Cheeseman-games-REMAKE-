@@ -378,9 +378,12 @@ impl Game {
                 if let Ok(Some(val)) = storage.get_item("cc_dev") {
                     input.is_dev = val == "true";
                 }
+                if let Ok(Some(val)) = storage.get_item("cc_debugMode") {
+                    input.is_debug = val == "true";
+                }
             }
         }
-        web_sys::console::log_1(&format!("[wasm] init: tester={} dev={}", input.is_tester, input.is_dev).into());
+        web_sys::console::log_1(&format!("[wasm] init: tester={} dev={} debug={}", input.is_tester, input.is_dev, input.is_debug).into());
 
         let achievement_states: Vec<AchievementState> = data::ACHIEVEMENTS.iter().map(|a| AchievementState::new(a.id)).collect();
 
@@ -428,9 +431,12 @@ impl Game {
                 if let Ok(Some(val)) = storage.get_item("cc_dev") {
                     self.input.is_dev = val == "true";
                 }
+                if let Ok(Some(val)) = storage.get_item("cc_debugMode") {
+                    self.input.is_debug = val == "true";
+                }
             }
         }
-        web_sys::console::log_1(&format!("[wasm] poll: tester={} dev={}", self.input.is_tester, self.input.is_dev).into());
+        web_sys::console::log_1(&format!("[wasm] poll: tester={} dev={} debug={}", self.input.is_tester, self.input.is_dev, self.input.is_debug).into());
     }
 
     pub fn update(&mut self) {
@@ -626,6 +632,17 @@ impl Game {
     fn draw_mode_badges(&self) -> Result<(), JsValue> {
         self.ctx.set_font("bold 16px Arial");
         let mut x = WIDTH - 10.0;
+        if self.input.is_debug {
+            let label = "DEBUG";
+            let tw = label.len() as f64 * 9.0;
+            x -= tw + 5.0;
+            self.ctx.set_fill_style_str("#FF00FF");
+            self.ctx.set_global_alpha(0.85);
+            self.ctx.fill_rect(x - 4.0, 4.0, tw + 8.0, 22.0);
+            self.ctx.set_global_alpha(1.0);
+            self.ctx.set_fill_style_str("#000");
+            self.ctx.fill_text(label, x, 20.0)?;
+        }
         if self.input.is_tester {
             let label = "TESTER";
             let tw = label.len() as f64 * 9.0;
@@ -835,9 +852,10 @@ impl Game {
     }
 
     pub fn is_cube_unlocked(&self, cube_id: u32) -> bool {
+        if self.input.is_debug { return true; }
         match cube_id {
             1 | 2 => true,
-            8 | 10 => false,
+            8 | 10 => self.input.is_dev,
             9 => self.get_achievement_state(6).unlocked,
             _ => {
                 let cube = data::get_cube_by_id(cube_id);
@@ -959,7 +977,7 @@ impl Game {
         let mut html = String::new();
         for ach_data in data::ACHIEVEMENTS {
             let state = self.get_achievement_state(ach_data.id);
-            let unlocked = state.unlocked;
+            let unlocked = state.unlocked || self.input.is_debug;
             let progress = state.progress;
 
             let item_class = if unlocked { "achievement-item unlocked" } else { "achievement-item locked" };

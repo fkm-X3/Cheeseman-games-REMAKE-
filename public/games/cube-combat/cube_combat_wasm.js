@@ -59,6 +59,14 @@ export function get_cubes_grid_html() {
 /**
  * @returns {boolean}
  */
+export function get_debug() {
+    const ret = wasm.get_debug();
+    return ret !== 0;
+}
+
+/**
+ * @returns {boolean}
+ */
 export function get_dev() {
     const ret = wasm.get_dev();
     return ret !== 0;
@@ -194,6 +202,16 @@ export function restart_game() {
  */
 export function select_cube(id) {
     const ret = wasm.select_cube(id);
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
+/**
+ * @param {boolean} enabled
+ */
+export function set_debug(enabled) {
+    const ret = wasm.set_debug(enabled);
     if (ret[1]) {
         throw takeFromExternrefTable0(ret[0]);
     }
