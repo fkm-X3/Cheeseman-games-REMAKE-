@@ -340,6 +340,9 @@ function __wbg_get_imports() {
             const ret = arg0.localStorage;
             return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
         }, arguments); },
+        __wbg_log_eb752234eec406d1: function(arg0) {
+            console.log(arg0);
+        },
         __wbg_moveTo_11bf5a977e6b8610: function(arg0, arg1, arg2) {
             arg0.moveTo(arg1, arg2);
         },

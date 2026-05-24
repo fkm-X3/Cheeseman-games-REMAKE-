@@ -380,6 +380,7 @@ impl Game {
                 }
             }
         }
+        web_sys::console::log_1(&format!("[wasm] init: tester={} dev={}", input.is_tester, input.is_dev).into());
 
         let achievement_states: Vec<AchievementState> = data::ACHIEVEMENTS.iter().map(|a| AchievementState::new(a.id)).collect();
 
@@ -429,6 +430,7 @@ impl Game {
                 }
             }
         }
+        web_sys::console::log_1(&format!("[wasm] poll: tester={} dev={}", self.input.is_tester, self.input.is_dev).into());
     }
 
     pub fn update(&mut self) {
@@ -621,10 +623,39 @@ impl Game {
         Ok(())
     }
 
+    fn draw_mode_badges(&self) -> Result<(), JsValue> {
+        self.ctx.set_font("bold 16px Arial");
+        let mut x = WIDTH - 10.0;
+        if self.input.is_tester {
+            let label = "TESTER";
+            let tw = label.len() as f64 * 9.0;
+            x -= tw + 5.0;
+            self.ctx.set_fill_style_str("#00FF00");
+            self.ctx.set_global_alpha(0.85);
+            self.ctx.fill_rect(x - 4.0, 4.0, tw + 8.0, 22.0);
+            self.ctx.set_global_alpha(1.0);
+            self.ctx.set_fill_style_str("#000");
+            self.ctx.fill_text(label, x, 20.0)?;
+        }
+        if self.input.is_dev {
+            let label = "DEV";
+            let tw = 30.0;
+            x -= tw + 5.0;
+            self.ctx.set_fill_style_str("#FF8800");
+            self.ctx.set_global_alpha(0.85);
+            self.ctx.fill_rect(x - 4.0, 4.0, tw + 8.0, 22.0);
+            self.ctx.set_global_alpha(1.0);
+            self.ctx.set_fill_style_str("#000");
+            self.ctx.fill_text(label, x, 20.0)?;
+        }
+        Ok(())
+    }
+
     fn render_menu(&self) -> Result<(), JsValue> {
         self.ctx.set_fill_style_str("#1a1a2e");
         self.ctx.fill_rect(0.0, 0.0, WIDTH, HEIGHT);
 
+        let _ = self.draw_mode_badges();
         let _ = show_menu();
 
         Ok(())
