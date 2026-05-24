@@ -9,7 +9,11 @@ export function get_cube_details_html(cube_id: number): string;
 
 export function get_cubes_grid_html(): string;
 
+export function get_dev(): boolean;
+
 export function get_selected_cube_id(): number;
+
+export function get_tester(): boolean;
 
 export function go_to_menu(): void;
 
@@ -37,7 +41,11 @@ export function restart_game(): void;
 
 export function select_cube(id: number): void;
 
+export function set_dev(enabled: boolean): void;
+
 export function set_selected_cube(id: number): void;
+
+export function set_tester(enabled: boolean): void;
 
 export function show_game_over(winner: string): void;
 
@@ -51,7 +59,9 @@ export interface InitOutput {
     readonly get_achievements_html: () => [number, number];
     readonly get_cube_details_html: (a: number) => [number, number];
     readonly get_cubes_grid_html: () => [number, number];
+    readonly get_dev: () => number;
     readonly get_selected_cube_id: () => number;
+    readonly get_tester: () => number;
     readonly go_to_menu: () => [number, number];
     readonly handle_key_down: (a: number, b: number) => [number, number];
     readonly handle_key_up: (a: number, b: number) => [number, number];
@@ -65,6 +75,8 @@ export interface InitOutput {
     readonly reset_all_progress: () => [number, number];
     readonly restart_game: () => [number, number];
     readonly select_cube: (a: number) => [number, number];
+    readonly set_dev: (a: number) => [number, number];
+    readonly set_tester: (a: number) => [number, number];
     readonly show_game_over: (a: number, b: number) => [number, number];
     readonly show_menu: () => [number, number];
     readonly set_selected_cube: (a: number) => [number, number];

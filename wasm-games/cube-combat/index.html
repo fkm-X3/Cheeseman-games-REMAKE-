@@ -305,7 +305,7 @@
     </div>
 
     <script type="module">
-        import init, { init_game, init_menu, game_loop, handle_key_down, handle_key_up, restart_game, nav_to, prepare_game, show_game_over, go_to_menu, init_progress, set_selected_cube, get_selected_cube_id, get_cubes_grid_html, get_cube_details_html, get_achievements_html, reset_all_progress, set_tester, set_dev, get_tester, get_dev } from './cube_combat_wasm.js';
+        import init, { init_game, init_menu, game_loop, handle_key_down, handle_key_up, restart_game, nav_to, prepare_game, show_game_over, go_to_menu, init_progress, set_selected_cube, get_selected_cube_id, get_cubes_grid_html, get_cube_details_html, get_achievements_html, reset_all_progress, set_tester, set_dev, get_tester, get_dev } from './pkg/cube_combat_wasm.js';
 
         async function start() {
             await init();

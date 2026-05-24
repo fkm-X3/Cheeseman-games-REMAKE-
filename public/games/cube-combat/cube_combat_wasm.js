@@ -57,11 +57,27 @@ export function get_cubes_grid_html() {
 }
 
 /**
+ * @returns {boolean}
+ */
+export function get_dev() {
+    const ret = wasm.get_dev();
+    return ret !== 0;
+}
+
+/**
  * @returns {number}
  */
 export function get_selected_cube_id() {
     const ret = wasm.get_selected_cube_id();
     return ret >>> 0;
+}
+
+/**
+ * @returns {boolean}
+ */
+export function get_tester() {
+    const ret = wasm.get_tester();
+    return ret !== 0;
 }
 
 export function go_to_menu() {
@@ -184,10 +200,30 @@ export function select_cube(id) {
 }
 
 /**
+ * @param {boolean} enabled
+ */
+export function set_dev(enabled) {
+    const ret = wasm.set_dev(enabled);
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
+/**
  * @param {number} id
  */
 export function set_selected_cube(id) {
     const ret = wasm.set_selected_cube(id);
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
+/**
+ * @param {boolean} enabled
+ */
+export function set_tester(enabled) {
+    const ret = wasm.set_tester(enabled);
     if (ret[1]) {
         throw takeFromExternrefTable0(ret[0]);
     }
