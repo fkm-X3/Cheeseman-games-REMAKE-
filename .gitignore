@@ -145,3 +145,4 @@ vite.config.ts.timestamp-*
 # Misc
 what.js
 AGENTS.md
+wasm-games/cube-combat/target/
