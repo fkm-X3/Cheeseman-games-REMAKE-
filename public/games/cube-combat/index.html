@@ -245,6 +245,28 @@
             color: #aaa;
         }
 
+        .mode-badge {
+            font: bold 16px Arial;
+            padding: 3px 8px;
+            border-radius: 3px;
+            color: #000;
+            opacity: 0.85;
+            pointer-events: none;
+        }
+        .mode-badge.debug { background: #FF00FF; }
+        .mode-badge.tester { background: #00FF00; }
+        .mode-badge.dev { background: #FF8800; }
+
+        #mode-badges {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            z-index: 100;
+            display: flex;
+            gap: 4px;
+            pointer-events: none;
+        }
+
         .hidden {
             display: none !important;
         }
@@ -302,6 +324,11 @@
 <body>
     <div id="game-wrapper">
         <canvas id="game-canvas" width="800" height="600"></canvas>
+        <div id="mode-badges">
+            <div id="badge-debug" class="mode-badge debug hidden">DEBUG</div>
+            <div id="badge-tester" class="mode-badge tester hidden">TESTER</div>
+            <div id="badge-dev" class="mode-badge dev hidden">DEV</div>
+        </div>
     </div>
 
     <script type="module">
@@ -504,8 +531,18 @@
                 prepare_game('sandbox', 'screen-cubes');
             });
 
+            function updateModeBadges() {
+                const debugEl = document.getElementById('badge-debug');
+                const testerEl = document.getElementById('badge-tester');
+                const devEl = document.getElementById('badge-dev');
+                if (debugEl) debugEl.classList.toggle('hidden', !get_debug());
+                if (testerEl) testerEl.classList.toggle('hidden', !get_tester());
+                if (devEl) devEl.classList.toggle('hidden', !get_dev());
+            }
+
             function loop() {
                 game_loop();
+                updateModeBadges();
                 requestAnimationFrame(loop);
             }
             loop();

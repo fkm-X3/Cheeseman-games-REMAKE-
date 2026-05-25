@@ -11,9 +11,9 @@ export function get_cubes_grid_html(): string;
 
 export function get_debug(): boolean;
 
-export function get_debug(): boolean;
-
 export function get_dev(): boolean;
+
+export function get_selected_cube_id(): number;
 
 export function get_tester(): boolean;
 
@@ -45,9 +45,9 @@ export function select_cube(id: number): void;
 
 export function set_debug(enabled: boolean): void;
 
-export function set_debug(enabled: boolean): void;
-
 export function set_dev(enabled: boolean): void;
+
+export function set_selected_cube(id: number): void;
 
 export function set_tester(enabled: boolean): void;
 
