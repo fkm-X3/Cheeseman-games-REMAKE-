@@ -2,6 +2,7 @@ version: 2
 updates:
   - package-ecosystem: npm
     directory: /
+    target-branch: main
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
@@ -12,6 +13,7 @@ updates:
 
   - package-ecosystem: cargo
     directory: /wasm-games/cube-combat
+    target-branch: main
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
