@@ -1,3 +1,8 @@
+# IMPORTENT: orginal cheesman being picked up. ignore this repo
+
+
+
+
 # Cheeseman Games Remake
 
 A Next.js (App Router) game site ready for Vercel deployment, with Firebase-backed auth and leaderboard APIs.
