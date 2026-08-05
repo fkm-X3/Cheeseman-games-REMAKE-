@@ -34,13 +34,13 @@
     "firebase-admin": "^13.10.0",
     "jsonwebtoken": "^9.0.2",
     "next": "^16.2.6",
-    "react": "^19.2.6",
+    "react": "^19.2.7",
     "react-dom": "^19.2.6",
     "ts-essentials": "^10.0.0"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
-    "@types/react": "^19.2.15",
+    "@types/react": "^19.2.16",
     "@types/react-dom": "^19.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"
