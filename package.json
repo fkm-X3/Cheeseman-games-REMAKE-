@@ -35,7 +35,7 @@
     "jsonwebtoken": "^9.0.2",
     "next": "^16.2.6",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6",
+    "react-dom": "^19.2.7",
     "ts-essentials": "^10.0.0"
   },
   "devDependencies": {
